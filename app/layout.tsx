@@ -19,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <script src="https://fpyf8.com/88/tag.min.js" data-zone="166261" async data-cfasync="false"></script>
         <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
       </body>
     </html>
