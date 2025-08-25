@@ -6,6 +6,9 @@ import ClientLayoutWrapper from './ClientLayoutWrapper';
 export const metadata = {
   title: 'Sponsorship Visa Jobs - Find Your Next Career Opportunity',
   description: 'Discover thousands of job opportunities across various industries and locations. Your ultimate destination for job searching and career growth.',
+  other: {
+    monetag: '22f8f07698e7316e5ac699e84e0b77c2',
+  },
 };
 
 export default function RootLayout({
