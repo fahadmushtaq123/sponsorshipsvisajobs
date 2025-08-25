@@ -89,7 +89,6 @@ export default function Blogs() {
 
   return (
     <Container className="mt-5">
-      <script src="https://shoukigaigoors.net/act/files/tag.min.js?z=9773631" data-cfasync="false" async></script>
       <h1 className="text-center mb-4">Blogs</h1>
       <Row>
         <Col md={isAdmin ? 8 : 12}>

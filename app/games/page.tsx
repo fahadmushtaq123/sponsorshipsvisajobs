@@ -5,7 +5,6 @@ import { Container, Button } from 'react-bootstrap';
 export default function GamesList() {
   return (
     <main>
-      <script src="https://fenoofaussut.net/act/files/tag.min.js?z=9773631" data-cfasync="false" async></script>
       <Container className="mt-5 text-center">
         <h1>Our Games</h1>
         <p className="lead">Choose a game to play!</p>
