@@ -5,6 +5,31 @@ import { Container, Row, Col, Form, Button, Card, Modal } from 'react-bootstrap'
 import { useState, useContext } from 'react';
 import { BlogContext } from '../../context/BlogContext';
 import { AuthContext } from '../../context/AuthContext';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css'; // Import Quill's CSS
+
+// Define modules and formats for ReactQuill
+const modules = {
+  toolbar: [
+    [{ 'header': '1'}, {'header': '2'}, { 'font': [] }],
+    [{size: []}],
+    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+    [{'list': 'ordered'}, {'list': 'bullet'}, 
+     {'indent': '-1'}, {'indent': '+1'}],
+    ['link', 'image', 'video'],
+    ['clean']
+  ],
+  clipboard: {
+    matchVisual: false,
+  }
+};
+
+const formats = [
+  'header', 'font', 'size',
+  'bold', 'italic', 'underline', 'strike', 'blockquote',
+  'list', 'bullet', 'indent',
+  'link', 'image', 'video'
+];
 
 interface Blog {
   id: number;
@@ -98,7 +123,7 @@ export default function Blogs() {
               <Card.Img variant="top" src={blog.image} />
               <Card.Body>
                 <Card.Title>{blog.title}</Card.Title>
-                <Card.Text>{blog.description}</Card.Text>
+                <Card.Text dangerouslySetInnerHTML={{ __html: blog.description }} />
                 {isAdmin && (
                   <>
                     <Button variant="secondary" className="me-2" onClick={() => handleEditClick(blog)}>Edit</Button>
@@ -126,13 +151,13 @@ export default function Blogs() {
 
               <Form.Group className="mb-3" controlId="formDescription">
                 <Form.Label>Description</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={5}
-                  placeholder="Enter description"
+                <ReactQuill
+                  theme="snow"
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  required
+                  onChange={setDescription}
+                  modules={modules}
+                  formats={formats}
+                  placeholder="Enter description"
                 />
               </Form.Group>
 
@@ -165,11 +190,13 @@ export default function Blogs() {
             </Form.Group>
             <Form.Group className="mb-3" controlId="editFormDescription">
               <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={5}
+              <ReactQuill
+                theme="snow"
                 value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
+                onChange={setEditDescription}
+                modules={modules}
+                formats={formats}
+                placeholder="Enter description"
               />
             </Form.Group>
             <Form.Group controlId="editFormFile" className="mb-3">
