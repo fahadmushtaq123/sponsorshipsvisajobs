@@ -100,7 +100,7 @@ export default function Blogs() {
               <Card.Body>
                 <Card.Title>{blog.title}</Card.Title>
                 <Card.Text>
-                  <ReactMarkdown>{blog.description}</ReactMarkdown>
+                  <ReactMarkdown components={{ p: ({ node, ...props }) => <span {...props} /> }}>{blog.description}</ReactMarkdown>
                 </Card.Text>
                 {isAdmin && (
                   <>
