@@ -5,6 +5,7 @@ import { Container, Row, Col, Form, Button, Card, Modal } from 'react-bootstrap'
 import { useState, useContext } from 'react';
 import { BlogContext } from '../../context/BlogContext';
 import { AuthContext } from '../../context/AuthContext';
+import ReactMarkdown from 'react-markdown';
 
 interface Blog {
   id: number;
@@ -98,7 +99,9 @@ export default function Blogs() {
               <Card.Img variant="top" src={blog.image} />
               <Card.Body>
                 <Card.Title>{blog.title}</Card.Title>
-                <Card.Text>{blog.description}</Card.Text>
+                <Card.Text>
+                  <ReactMarkdown>{blog.description}</ReactMarkdown>
+                </Card.Text>
                 {isAdmin && (
                   <>
                     <Button variant="secondary" className="me-2" onClick={() => handleEditClick(blog)}>Edit</Button>
