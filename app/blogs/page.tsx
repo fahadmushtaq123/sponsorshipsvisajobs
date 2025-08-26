@@ -2,101 +2,14 @@
 'use client';
 
 import { Container, Row, Col, Form, Button, Card, Modal } from 'react-bootstrap';
-import { useState, useContext, useEffect, useRef } from 'react';
+import { useState, useContext } from 'react';
 import { BlogContext } from '../../context/BlogContext';
 import { AuthContext } from '../../context/AuthContext';
-
-
-// Lexical Imports
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
-import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
-import { HeadingNode, QuoteNode, ListItemNode, ListNode, ParagraphNode, TextNode, LineBreakNode } from '@lexical/nodes';
-import { $generateHtmlFromNodes, $generateNodesFromDOM } from '@lexical/html';
-import { $getRoot, $getSelection, EditorState } from 'lexical';
-
-// Lexical Editor Theme (basic)
-const theme = {
-  text: {
-    bold: 'font-bold',
-    italic: 'italic',
-    underline: 'underline',
-  },
-  paragraph: 'mb-1',
-  // Add other styles as needed
-};
-
-// Lexical Editor Config
-const editorConfig = {
-  namespace: 'BlogEditor',
-  theme,
-  onError(error: Error) {
-    console.error(error);
-  },
-  nodes: [
-    HeadingNode,
-    QuoteNode,
-    ListItemNode,
-    ListNode,
-    ParagraphNode,
-    TextNode,
-    LineBreakNode,
-  ],
-};
-
-// Toolbar Plugin (simplified for now)
-function ToolbarPlugin({ editor }: { editor: any }) {
-  const [activeEditor] = useLexicalComposerContext();
-  const formatText = (format: string) => {
-    activeEditor.update(() => {
-      const selection = $getSelection();
-      if (selection) {
-        selection.formatText(format);
-      }
-    });
-  };
-
-  return (
-    <div className="toolbar mb-2 border p-2 rounded">
-      <button onClick={() => formatText('bold')} className="btn btn-light btn-sm me-1">
-        <b>B</b>
-      </button>
-      <button onClick={() => formatText('italic')} className="btn btn-light btn-sm me-1">
-        <i>I</i>
-      </button>
-      <button onClick={() => formatText('underline')} className="btn btn-light btn-sm me-1">
-        <u>U</u>
-      </button>
-      {/* Add more buttons as needed */}
-    </div>
-  );
-}
-
-// Helper to convert Lexical EditorState to HTML
-function editorStateToHtml(editorState: EditorState): string {
-  return editorState.read(() => $generateHtmlFromNodes());
-}
-
-// Helper to convert HTML to Lexical EditorState
-function htmlToEditorState(html: string): EditorState {
-  const parser = new DOMParser();
-  const dom = parser.parseFromString(html, 'text/html');
-  return EditorState.createEmpty().read(() => {
-    const nodes = $generateNodesFromDOM(dom);
-    $getRoot().select();
-    $getRoot().append(...nodes);
-  });
-}
 
 interface Blog {
   id: number;
   title: string;
-  description: string; // This will now store HTML from Lexical
+  description: string;
   image: string;
 }
 
@@ -185,9 +98,7 @@ export default function Blogs() {
               <Card.Img variant="top" src={blog.image} />
               <Card.Body>
                 <Card.Title>{blog.title}</Card.Title>
-                <Card.Text>
-                  <ReactMarkdown components={{ p: ({ node, ...props }) => <span {...props} /> }}>{blog.description}</ReactMarkdown>
-                </Card.Text>
+                <Card.Text>{blog.description}</Card.Text>
                 {isAdmin && (
                   <>
                     <Button variant="secondary" className="me-2" onClick={() => handleEditClick(blog)}>Edit</Button>
@@ -215,23 +126,14 @@ export default function Blogs() {
 
               <Form.Group className="mb-3" controlId="formDescription">
                 <Form.Label>Description</Form.Label>
-                <div className="editor-wrapper border rounded p-2">
-                  <LexicalComposer initialConfig={editorConfig}>
-                    <ToolbarPlugin />
-                    <div className="editor-inner">
-                      <RichTextPlugin
-                        contentEditable={<ContentEditable className="editor-input" />}
-                        placeholder={<div className="editor-placeholder">Enter description...</div>}
-                        ErrorBoundary={LexicalErrorBoundary}
-                      />
-                      <HistoryPlugin />
-                      <AutoFocusPlugin />
-                      <OnChangePlugin onChange={(editorState) => {
-                        setDescription(editorStateToHtml(editorState));
-                      }} />
-                    </div>
-                  </LexicalComposer>
-                </div>
+                <Form.Control
+                  as="textarea"
+                  rows={5}
+                  placeholder="Enter description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                />
               </Form.Group>
 
               <Form.Group controlId="formFile" className="mb-3">
@@ -263,26 +165,12 @@ export default function Blogs() {
             </Form.Group>
             <Form.Group className="mb-3" controlId="editFormDescription">
               <Form.Label>Description</Form.Label>
-              <div className="editor-wrapper border rounded p-2">
-                <LexicalComposer initialConfig={{
-                  ...editorConfig,
-                  editorState: htmlToEditorState(editDescription),
-                }}>
-                  <ToolbarPlugin />
-                  <div className="editor-inner">
-                    <RichTextPlugin
-                      contentEditable={<ContentEditable className="editor-input" />}
-                      placeholder={<div className="editor-placeholder">Enter description...</div>}
-                      ErrorBoundary={LexicalErrorBoundary}
-                    />
-                    <HistoryPlugin />
-                    <AutoFocusPlugin />
-                    <OnChangePlugin onChange={(editorState) => {
-                      setEditDescription(editorStateToHtml(editorState));
-                    }} />
-                  </div>
-                </LexicalComposer>
-              </div>
+              <Form.Control
+                as="textarea"
+                rows={5}
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+              />
             </Form.Group>
             <Form.Group controlId="editFormFile" className="mb-3">
               <Form.Label>Change Image (optional)</Form.Label>
