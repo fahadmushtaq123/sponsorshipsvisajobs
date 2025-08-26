@@ -9,8 +9,8 @@ export const metadata: Metadata = {
 };
 
 interface Company {
-  "Company Name": string;
-  "Website": string;
+  name: string;
+  website: string;
 }
 
 export default async function TwentyKCompaniesPage() {
