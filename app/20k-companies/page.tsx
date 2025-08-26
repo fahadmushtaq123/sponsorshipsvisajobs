@@ -28,9 +28,9 @@ export default async function TwentyKCompaniesPage() {
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {companies.map((company, index) => (
             <li key={index} style={{ marginBottom: '10px', padding: '10px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontWeight: 'bold', color: '#333' }}>{company["Company Name"]}</span>
-              {company["Website"] && (
-                                 <a href={company["Website"]} target="_blank" rel="noopener noreferrer" style={{ color: '#0070f3', textDecoration: 'none', marginLeft: '20px' }}>
+              <span style={{ fontWeight: 'bold', color: '#333' }}>{company.name}</span>
+              {company.website && (
+                                 <a href={company.website} target="_blank" rel="noopener noreferrer" style={{ color: '#0070f3', textDecoration: 'none', marginLeft: '20px' }}>
                   Visit Website
                 </a>
               )}
