@@ -5,8 +5,8 @@ import { Container, Row, Col, Form, Button, Card, Modal } from 'react-bootstrap'
 import { useState, useContext } from 'react';
 import { BlogContext } from '../../context/BlogContext';
 import { AuthContext } from '../../context/AuthContext';
-import ReactQuill from 'react-quill-new';
-import 'react-quill-new/dist/quill.snow.css'; // Import Quill's CSS
+import dynamic from 'next/dynamic';
+
 
 // Define modules and formats for ReactQuill
 const modules = {
@@ -30,6 +30,12 @@ const formats = [
   'list', 'bullet', 'indent',
   'link', 'image', 'video'
 ];
+
+// Dynamically import ReactQuill to prevent SSR issues
+const ReactQuill = dynamic(() => import('react-quill-new'), {
+  ssr: false,
+  loading: () => <p>Loading editor...</p>,
+});
 
 interface Blog {
   id: number;
