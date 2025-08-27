@@ -16,6 +16,7 @@ export default function SponsorshipJobsClient() {
   const { jobs, addJob, deleteJob } = jobContext;
   const { isAdmin } = authContext;
   const [jobTitle, setJobTitle] = useState('');
+  const [companyName, setCompanyName] = useState('');
   const [country, setCountry] = useState('');
   const [city, setCity] = useState('');
   const [jobDetail, setJobDetail] = useState('');
@@ -28,11 +29,12 @@ export default function SponsorshipJobsClient() {
     }
     addJob({
       title: jobTitle,
-      company: 'Your Company', // Placeholder
+      company: companyName,
       location: `${city}, ${country}`,
       description: jobDetail,
     });
     setJobTitle('');
+    setCompanyName(''); // Reset companyName
     setCountry('');
     setCity('');
     setJobDetail('');
@@ -71,6 +73,17 @@ export default function SponsorshipJobsClient() {
                   placeholder="Enter job title"
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="formCompanyName">
+                <Form.Label>Company Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter company name"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
                   required
                 />
               </Form.Group>

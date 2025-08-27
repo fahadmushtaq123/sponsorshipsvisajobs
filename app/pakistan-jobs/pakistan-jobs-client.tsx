@@ -17,6 +17,7 @@ export default function PakistanJobsClient() {
   const { jobs, addJob, deleteJob } = jobContext;
   const { isAdmin } = authContext;
   const [jobTitle, setJobTitle] = useState('');
+  const [companyName, setCompanyName] = useState('');
   const [city, setCity] = useState('');
   const [jobDetail, setJobDetail] = useState('');
   const [jobImage, setJobImage] = useState<File | null>(null);
@@ -36,7 +37,7 @@ export default function PakistanJobsClient() {
       reader.onloadend = () => {
         addJob({
           title: jobTitle,
-          company: 'Your Company', // Placeholder
+          company: companyName,
           location: `${city}, Pakistan`,
           description: jobDetail,
           image: reader.result as string,
@@ -46,13 +47,14 @@ export default function PakistanJobsClient() {
     } else {
       addJob({
         title: jobTitle,
-        company: 'Your Company', // Placeholder
+        company: companyName,
         location: `${city}, Pakistan`,
         description: jobDetail,
         image: null,
       });
     }
     setJobTitle('');
+    setCompanyName(''); // Reset companyName
     setCity('');
     setJobDetail('');
     setJobImage(null);
@@ -97,6 +99,17 @@ export default function PakistanJobsClient() {
                   placeholder="Enter job title"
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="formCompanyName">
+                <Form.Label>Company Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter company name"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
                   required
                 />
               </Form.Group>

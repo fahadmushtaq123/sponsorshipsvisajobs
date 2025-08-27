@@ -17,6 +17,7 @@ export default function GovernmentJobsClient() {
   const { jobs, addJob, deleteJob } = jobContext;
   const { isAdmin } = authContext;
   const [jobTitle, setJobTitle] = useState('');
+  const [companyName, setCompanyName] = useState('');
   const [country, setCountry] = useState('');
   const [city, setCity] = useState('');
   const [jobDetail, setJobDetail] = useState('');
@@ -37,7 +38,7 @@ export default function GovernmentJobsClient() {
       reader.onloadend = () => {
         addJob({
           title: jobTitle,
-          company: 'Your Company', // Placeholder
+          company: companyName,
           location: `${city}, ${country} Government`,
           description: jobDetail,
           image: reader.result as string,
@@ -47,13 +48,14 @@ export default function GovernmentJobsClient() {
     } else {
       addJob({
         title: jobTitle,
-        company: 'Your Company', // Placeholder
+        company: companyName,
         location: `${city}, ${country} Government`,
         description: jobDetail,
         image: null,
       });
     }
     setJobTitle('');
+    setCompanyName(''); // Reset companyName
     setCity('');
     setJobDetail('');
     setJobImage(null);
@@ -99,6 +101,17 @@ export default function GovernmentJobsClient() {
                   placeholder="Enter job title"
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="formCompanyName">
+                <Form.Label>Company Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter company name"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
                   required
                 />
               </Form.Group>
