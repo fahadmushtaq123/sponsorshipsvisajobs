@@ -43,7 +43,7 @@ export default function SponsorshipJobsClient() {
 
   return (
     <Container className="mt-5" style={{ backgroundImage: "url(/compressed/common-bg.png)", backgroundSize: 'cover' }}>
-      {/* <script src="https://fpyf8.com/88/tag.min.js" data-zone="166270" async data-cfasync="false"></script> */}
+      <script src="https://fpyf8.com/88/tag.min.js" data-zone="166270" async data-cfasync="false"></script>
       <h1 className="text-center mb-4">Sponsorship Visa Jobs</h1>
       <Row>
         <Col md={isAdmin ? 8 : 12}>
