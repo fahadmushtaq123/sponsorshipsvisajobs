@@ -6,12 +6,7 @@ import { useState, useContext } from 'react';
 import { BlogContext } from '../../context/BlogContext';
 import { AuthContext } from '../../context/AuthContext';
 
-interface Blog {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-}
+import { Blog } from '../../context/BlogContext'; // Import Blog interface
 
 export default function Blogs() {
   const blogContext = useContext(BlogContext);
