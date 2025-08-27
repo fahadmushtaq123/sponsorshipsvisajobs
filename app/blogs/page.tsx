@@ -26,11 +26,15 @@ export default function Blogs() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState<File | null>(null);
+  const [imageWidth, setImageWidth] = useState<string>('');
+  const [imageHeight, setImageHeight] = useState<string>('');
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentBlog, setCurrentBlog] = useState<Blog | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [editImage, setEditImage] = useState<File | null>(null);
+  const [editImageWidth, setEditImageWidth] = useState<string>('');
+  const [editImageHeight, setEditImageHeight] = useState<string>('');
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,10 +45,14 @@ export default function Blogs() {
           title,
           description,
           image: reader.result as string,
+          imageWidth, // Add imageWidth
+          imageHeight, // Add imageHeight
         });
         setTitle('');
         setDescription('');
         setImage(null);
+        setImageWidth(''); // Reset imageWidth
+        setImageHeight(''); // Reset imageHeight
       };
       reader.readAsDataURL(image);
     }
@@ -55,6 +63,8 @@ export default function Blogs() {
     setEditTitle(blog.title);
     setEditDescription(blog.description);
     setEditImage(null); // Clear previous image selection
+    setEditImageWidth(blog.imageWidth || ''); // Set current width
+    setEditImageHeight(blog.imageHeight || ''); // Set current height
     setShowEditModal(true);
   };
 
@@ -68,10 +78,14 @@ export default function Blogs() {
             title: editTitle,
             description: editDescription,
             image: reader.result as string,
+            imageWidth: editImageWidth, // Add editImageWidth
+            imageHeight: editImageHeight, // Add editImageHeight
           });
           setShowEditModal(false);
           setCurrentBlog(null);
           setEditImage(null);
+          setEditImageWidth(''); // Reset editImageWidth
+          setEditImageHeight(''); // Reset editImageHeight
         };
         reader.readAsDataURL(editImage);
       } else {
@@ -80,6 +94,8 @@ export default function Blogs() {
           ...currentBlog,
           title: editTitle,
           description: editDescription,
+          imageWidth: editImageWidth, // Add editImageWidth
+          imageHeight: editImageHeight, // Add editImageHeight
         });
         setShowEditModal(false);
         setCurrentBlog(null);
@@ -95,7 +111,13 @@ export default function Blogs() {
           <h2>Latest Blogs</h2>
           {blogs.map((blog) => (
             <Card key={blog.id} className="mb-3">
-              <Card.Img variant="top" src={blog.image} />
+              {blog.image && (
+                <Card.Img
+                  variant="top"
+                  src={blog.image}
+                  style={{ width: blog.imageWidth || '100%', height: blog.imageHeight || 'auto', objectFit: 'contain' }}
+                />
+              )}
               <Card.Body>
                 <Card.Title>{blog.title}</Card.Title>
                 <Card.Text>{blog.description}</Card.Text>
@@ -141,6 +163,25 @@ export default function Blogs() {
                 <Form.Control type="file" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setImage(e.target.files ? e.target.files[0] : null)} required />
               </Form.Group>
 
+              <Form.Group className="mb-3" controlId="formImageWidth">
+                <Form.Label>Image Width (px or %)</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="e.g., 300px or 100%"
+                  value={imageWidth}
+                  onChange={(e) => setImageWidth(e.target.value)}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="formImageHeight">
+                <Form.Label>Image Height (px or %)</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="e.g., 200px or auto"
+                  value={imageHeight}
+                  onChange={(e) => setImageHeight(e.target.value)}
+                />
+              </Form.Group>
+
               <Button variant="primary" type="submit">
                 Submit
               </Button>
@@ -175,6 +216,24 @@ export default function Blogs() {
             <Form.Group controlId="editFormFile" className="mb-3">
               <Form.Label>Change Image (optional)</Form.Label>
               <Form.Control type="file" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditImage(e.target.files ? e.target.files[0] : null)} />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="editFormImageWidth">
+              <Form.Label>Image Width (px or %)</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="e.g., 300px or 100%"
+                value={editImageWidth}
+                onChange={(e) => setEditImageWidth(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="editFormImageHeight">
+              <Form.Label>Image Height (px or %)</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="e.g., 200px or auto"
+                value={editImageHeight}
+                onChange={(e) => setEditImageHeight(e.target.value)}
+              />
             </Form.Group>
           </Form>
         </Modal.Body>

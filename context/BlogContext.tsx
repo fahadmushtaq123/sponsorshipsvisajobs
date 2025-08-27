@@ -8,6 +8,8 @@ interface Blog {
   title: string;
   description: string;
   image: string; // For simplicity, we'll store the image as a base64 string
+  imageWidth?: string; // Optional width for display
+  imageHeight?: string; // Optional height for display
 }
 
 interface BlogContextType {
