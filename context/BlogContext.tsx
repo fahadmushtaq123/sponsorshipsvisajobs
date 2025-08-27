@@ -3,7 +3,7 @@
 
 import { createContext, useState, useEffect, ReactNode } from 'react';
 
-interface Blog {
+export interface Blog {
   id: number;
   title: string;
   description: string;
