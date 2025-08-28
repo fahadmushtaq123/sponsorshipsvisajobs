@@ -3,12 +3,6 @@ import { NextResponse } from 'next/server';
 
 const uri = process.env.NEXT_PUBLIC_MONGODB_URI; // Use environment variable for security
 
-console.log('MONGODB_URI value:', uri);
-
-if (!uri) {
-  throw new Error('MONGODB_URI is not defined in environment variables');
-}
-
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
