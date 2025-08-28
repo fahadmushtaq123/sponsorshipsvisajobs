@@ -30,7 +30,7 @@ export default function SponsorshipJobsClient() {
     addJob({
       title: jobTitle,
       company: companyName,
-      location: `${city}, ${country}`,
+      location: `${city}, ${country}, Sponsorship`,
       description: jobDetail,
     });
     setJobTitle('');
