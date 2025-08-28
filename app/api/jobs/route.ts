@@ -1,55 +1,57 @@
-
+import { MongoClient, ServerApiVersion, Collection, ObjectId } from 'mongodb';
 import { NextResponse } from 'next/server';
 
-interface Job {
-  id: number;
-  title: string;
-  company: string;
-  location: string;
-  description: string;
-  image?: string | null;
+const uri = process.env.MONGODB_URI; // Use environment variable for security
+
+if (!uri) {
+  throw new Error('MONGODB_URI is not defined in environment variables');
 }
 
-// Mock data
-let jobs: Job[] = [
-  {
-    id: 1,
-    title: 'Software Engineer',
-    company: 'Tech Corp',
-    location: 'San Francisco, CA',
-    description: 'Developing amazing software.',
-    image: null,
-  },
-  {
-    id: 2,
-    title: 'Product Manager',
-    company: 'Innovate Inc',
-    location: 'New York, NY',
-    description: 'Managing the product lifecycle.',
-    image: null,
-  },
-];
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  }
+});
+
+let jobsCollection: Collection | null = null;
+
+async function connectToDatabase() {
+  if (!jobsCollection) {
+    await client.connect();
+    const database = client.db("job_board_db"); // Your database name
+    jobsCollection = database.collection("jobs"); // Your collection name
+  }
+  return jobsCollection;
+}
 
 export async function GET() {
-  return NextResponse.json(jobs);
+  try {
+    const collection = await connectToDatabase();
+    const jobs = await collection.find({}).toArray();
+    return NextResponse.json(jobs);
+  } catch (error) {
+    console.error("Failed to fetch jobs:", error);
+    return NextResponse.json({ message: "Failed to fetch jobs", error: (error as Error).message }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
   try {
+    const collection = await connectToDatabase();
     const jobData = await req.json();
-    const newJob: Job = {
-      id: jobs.length + 1,
-      ...jobData,
-    };
-    jobs.push(newJob);
-    return NextResponse.json(newJob, { status: 201 });
+    const result = await collection.insertOne(jobData);
+    return NextResponse.json({ message: "Job posted successfully", jobId: result.insertedId }, { status: 201 });
   } catch (error) {
+    console.error("Failed to post job:", error);
     return NextResponse.json({ message: "Failed to post job", error: (error as Error).message }, { status: 500 });
   }
 }
 
 export async function DELETE(req: Request) {
   try {
+    const collection = await connectToDatabase();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
 
@@ -57,16 +59,15 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ message: "Job ID is required" }, { status: 400 });
     }
 
-    const jobIndex = jobs.findIndex(job => job.id === parseInt(id, 10));
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
 
-    if (jobIndex === -1) {
+    if (result.deletedCount === 0) {
       return NextResponse.json({ message: "Job not found" }, { status: 404 });
     }
 
-    jobs.splice(jobIndex, 1);
-
     return NextResponse.json({ message: "Job deleted successfully" }, { status: 200 });
   } catch (error) {
+    console.error("Failed to delete job:", error);
     return NextResponse.json({ message: "Failed to delete job", error: (error as Error).message }, { status: 500 });
   }
 }
