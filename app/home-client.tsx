@@ -33,8 +33,8 @@ function JobsList() {
     ? jobs.filter(job => job.title === title)
     : jobs;
 
-  const governmentJobsCount = jobs.filter(job => job.location.toLowerCase().includes('government')).length;
-  const sponsorshipJobsCount = jobs.filter(job => job.location.toLowerCase().includes('sponsorship')).length;
+  const governmentJobsCount = jobs.filter(job => job.location && job.location.toLowerCase().includes('government')).length;
+  const sponsorshipJobsCount = jobs.filter(job => job.location && job.location.toLowerCase().includes('sponsorship')).length;
   const scholarshipsCount = scholarships.length;
 
   const totalPages = Math.ceil(filteredJobs.length / JOBS_PER_PAGE);
