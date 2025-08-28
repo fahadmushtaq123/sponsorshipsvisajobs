@@ -1,12 +1,33 @@
 import JobDetailsClient from './JobDetailsClient';
+import { MongoClient, ServerApiVersion } from 'mongodb';
+
+const uri = "mongodb+srv://sponsorshipsvisajobs-db:Sanpak1122@cluster0.28a3dng.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 export async function generateStaticParams() {
-  const res = await fetch('http://localhost:3000/api/jobs');
-  const jobs = await res.json();
- 
-  return jobs.map((job: { _id: string }) => ({
-    id: job._id,
-  }));
+  if (!uri) {
+    return [];
+  }
+
+  const client = new MongoClient(uri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
+
+  try {
+    await client.connect();
+    const database = client.db("job_board_db");
+    const jobsCollection = database.collection("jobs");
+    const jobs = await jobsCollection.find({}).toArray();
+
+    return jobs.map((job) => ({
+      id: job._id.toString(),
+    }));
+  } finally {
+    await client.close();
+  }
 }
 
 export default function JobDetailsPage() {
