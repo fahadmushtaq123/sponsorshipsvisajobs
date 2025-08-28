@@ -6,6 +6,8 @@ const uri = process.env.NEXT_PUBLIC_MONGODB_URI; // Use environment variable for
 let client: MongoClient | undefined;
 let jobsCollection: Collection | null = null;
 
+let connectToDatabase: () => Promise<Collection>; // Declare connectToDatabase here
+
 if (uri) {
   client = new MongoClient(uri, {
     serverApi: {
@@ -15,22 +17,22 @@ if (uri) {
     }
   });
 
-  async function connectToDatabase() {
+  connectToDatabase = async () => { // Assign function here
     if (!jobsCollection) {
       await client!.connect(); // Use non-null assertion as client is defined if uri is
       const database = client!.db("job_board_db"); // Your database name
       jobsCollection = database.collection("jobs"); // Your collection name
     }
     return jobsCollection;
-  }
+  };
 } else {
   // Fallback for when URI is not defined (e.g., during build or if not set)
   // This block will prevent the build from failing, but runtime operations will fail
   // if the URI is truly missing.
   console.warn("MONGODB_URI is not defined. Database operations will fail at runtime.");
-  async function connectToDatabase() {
+  connectToDatabase = async () => { // Assign function here
     throw new Error("Database connection URI is not defined.");
-  }
+  };
 }
 
 export async function GET() {
