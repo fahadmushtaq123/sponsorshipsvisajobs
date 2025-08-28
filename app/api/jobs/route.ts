@@ -1,7 +1,7 @@
 import { MongoClient, ServerApiVersion, Collection, ObjectId } from 'mongodb';
 import { NextResponse } from 'next/server';
 
-const uri = process.env.MONGODB_URI; // Use environment variable for security
+const uri = process.env.NEXT_PUBLIC_MONGODB_URI; // Use environment variable for security
 
 if (!uri) {
   throw new Error('MONGODB_URI is not defined in environment variables');
