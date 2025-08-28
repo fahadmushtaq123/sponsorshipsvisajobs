@@ -25,7 +25,7 @@ export default function JobDetails() {
   }
 
   const { jobs } = context;
-  const job = jobs.find(j => j.id === Number(jobId));
+  const job = jobs.find(j => j.id === jobId);
 
   if (!job) {
     return <div>Job not found</div>;
