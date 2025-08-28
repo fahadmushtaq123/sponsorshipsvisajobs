@@ -32,7 +32,12 @@ export const JobProvider = ({ children }: { children: ReactNode }) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
         const data = await response.json();
-        setJobs(data);
+        // Map _id to id
+        const mappedJobs = data.map((job: any) => ({
+          ...job,
+          id: job._id // Assuming _id is always present
+        }));
+        setJobs(mappedJobs);
       } catch (error) {
         console.error('Failed to fetch jobs:', error);
       }
