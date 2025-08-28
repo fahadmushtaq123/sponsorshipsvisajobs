@@ -66,7 +66,7 @@ export default function PakistanJobsClient() {
       <Row>
         <Col md={isAdmin ? 8 : 12}>
           <h2>Jobs in Pakistan</h2>
-          {jobs.filter(job => job.location.includes('Pakistan')).map((job) => (
+          {jobs.filter(job => job.location && job.location.includes('Pakistan')).map((job) => (
             <Card key={job.id} className="mb-3">
               {job.image && 
                 <Card.Img 
