@@ -48,7 +48,7 @@ export default function SponsorshipJobsClient() {
       <Row>
         <Col md={isAdmin ? 8 : 12}>
           <h2>Jobs with Visa Sponsorship</h2>
-          {jobs.map((job) => (
+          {jobs.filter(job => job.location && job.location.toLowerCase().includes('sponsorship')).map((job) => (
             <Card key={job.id} className="mb-3">
               <Card.Body>
                 <Card.Title>{job.title}</Card.Title>
