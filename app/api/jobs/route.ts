@@ -51,13 +51,13 @@ export async function GET(req: Request) {
       }
       // Map the _id to id
       const jobWithId = { ...job, id: job._id.toString() };
-      return NextResponse.json(jobWithId);
+      return NextResponse.json(jobWithId, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
     } else {
       // Fetch all jobs
       const jobs = await collection.find({}).toArray();
       // Map the _id to id for each job
       const jobsWithId = jobs.map(job => ({ ...job, id: job._id.toString() }));
-      return NextResponse.json(jobsWithId);
+      return NextResponse.json(jobsWithId, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
     }
   } catch (error) {
     console.error("Failed to fetch jobs:", error);
