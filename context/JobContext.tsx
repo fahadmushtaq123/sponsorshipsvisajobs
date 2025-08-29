@@ -1,4 +1,3 @@
-
 'use client';
 
 import { createContext, useState, useEffect, ReactNode } from 'react';
@@ -23,29 +22,29 @@ export const JobContext = createContext<JobContextType | undefined>(undefined);
 export const JobProvider = ({ children }: { children: ReactNode }) => {
   const [jobs, setJobs] = useState<Job[]>([]);
 
-  // Fetch jobs from API on component mount
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const response = await fetch('/api/jobs');
+  const fetchJobs = async () => {
+    try {
+      const response = await fetch('/api/jobs');
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.error(`HTTP error! status: ${response.status}`);
+        return;
       }
-        const data = await response.json();
-        // Map _id to id
-        const mappedJobs = data.map((job: any) => ({
-          ...job,
-          id: job._id // Assuming _id is always present
-        }));
-        setJobs(mappedJobs);
-      } catch (error) {
-        console.error('Failed to fetch jobs:', error);
-      }
-    };
+      const data = await response.json();
+      const mappedJobs = data.map((job: any) => ({
+        ...job,
+        id: job._id
+      }));
+      setJobs(mappedJobs);
+    } catch (error) {
+      console.error('Failed to fetch jobs:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchJobs();
   }, []);
 
-    const addJob = async (job: Omit<Job, 'id'>) => {
+  const addJob = async (job: Omit<Job, 'id'>) => {
     try {
       const response = await fetch('/api/jobs', {
         method: 'POST',
@@ -55,11 +54,11 @@ export const JobProvider = ({ children }: { children: ReactNode }) => {
         body: JSON.stringify(job),
       });
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.error(`HTTP error! status: ${response.status}`);
+        return;
       }
-      const newJob = await response.json();
-      // Assuming the API returns the created job with an ID
-      setJobs(prevJobs => [newJob, ...prevJobs]);
+      // Refetch jobs after adding a new one
+      fetchJobs();
     } catch (error) {
       console.error('Failed to add job:', error);
     }
@@ -71,7 +70,8 @@ export const JobProvider = ({ children }: { children: ReactNode }) => {
         method: 'DELETE',
       });
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.error(`HTTP error! status: ${response.status}`);
+        return;
       }
       setJobs(prevJobs => prevJobs.filter(job => job.id !== id));
     } catch (error) {

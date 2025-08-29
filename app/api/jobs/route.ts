@@ -6,9 +6,9 @@ const uri = process.env.NEXT_PUBLIC_MONGODB_URI; // Use environment variable for
 let client: MongoClient | undefined;
 let jobsCollection: Collection | null = null;
 
-let connectToDatabase: () => Promise<Collection>; // Declare connectToDatabase here
+let connectToDatabase: () => Promise<Collection | null>; // Declare connectToDatabase here, can return null
 
-if (uri) {
+if (uri && uri !== "YOUR_MONGODB_URI_HERE") {
   client = new MongoClient(uri, {
     serverApi: {
       version: ServerApiVersion.v1,
@@ -26,20 +26,39 @@ if (uri) {
     return jobsCollection;
   };
 } else {
-  // Fallback for when URI is not defined (e.g., during build or if not set)
-  // This block will prevent the build from failing, but runtime operations will fail
-  // if the URI is truly missing.
-  console.warn("MONGODB_URI is not defined. Database operations will fail at runtime.");
+  // Fallback for when URI is not defined
+  console.warn("MONGODB_URI is not defined. Database operations will be disabled.");
   connectToDatabase = async () => { // Assign function here
-    throw new Error("Database connection URI is not defined.");
+    return null;
   };
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const collection = await connectToDatabase();
-    const jobs = await collection.find({}).toArray();
-    return NextResponse.json(jobs);
+    if (!collection) {
+      return NextResponse.json([]);
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (id) {
+      // Fetch a single job
+      const job = await collection.findOne({ _id: new ObjectId(id) });
+      if (!job) {
+        return NextResponse.json({ message: "Job not found" }, { status: 404 });
+      }
+      // Map the _id to id
+      const jobWithId = { ...job, id: job._id.toString() };
+      return NextResponse.json(jobWithId);
+    } else {
+      // Fetch all jobs
+      const jobs = await collection.find({}).toArray();
+      // Map the _id to id for each job
+      const jobsWithId = jobs.map(job => ({ ...job, id: job._id.toString() }));
+      return NextResponse.json(jobsWithId);
+    }
   } catch (error) {
     console.error("Failed to fetch jobs:", error);
     return NextResponse.json({ message: "Failed to fetch jobs", error: (error as Error).message }, { status: 500 });
@@ -49,6 +68,9 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const collection = await connectToDatabase();
+    if (!collection) {
+      return NextResponse.json({ message: "Database not configured" }, { status: 503 });
+    }
     const jobData = await req.json();
     const result = await collection.insertOne(jobData);
     return NextResponse.json({ message: "Job posted successfully", jobId: result.insertedId }, { status: 201 });
@@ -61,6 +83,9 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const collection = await connectToDatabase();
+    if (!collection) {
+      return NextResponse.json({ message: "Database not configured" }, { status: 503 });
+    }
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
 

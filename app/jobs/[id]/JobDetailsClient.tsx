@@ -1,31 +1,62 @@
-
 'use client';
 
-import { useContext, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Card } from 'react-bootstrap';
-import { JobContext } from '../../../context/JobContext';
 import { useParams } from 'next/navigation';
 import ImageModal from '../../../components/ImageModal';
 
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  description: string;
+  image?: string | null;
+}
+
 export default function JobDetails() {
-  const context = useContext(JobContext);
   const params = useParams();
   const jobId = params.id;
+  const [job, setJob] = useState<Job | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [showModal, setShowModal] = useState(false);
   const [modalImageUrl, setModalImageUrl] = useState('');
+
+  useEffect(() => {
+    if (jobId) {
+      const fetchJobDetails = async () => {
+        try {
+          const response = await fetch(`/api/jobs?id=${jobId}`);
+          if (!response.ok) {
+            throw new Error('Job not found');
+          }
+          const data = await response.json();
+          setJob(data);
+        } catch (err) {
+          setError((err as Error).message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchJobDetails();
+    }
+  }, [jobId]);
 
   const handleImageClick = (imageUrl: string) => {
     setModalImageUrl(imageUrl);
     setShowModal(true);
   };
 
-  if (!context) {
+  if (loading) {
     return <div>Loading...</div>;
   }
 
-  const { jobs } = context;
-  const job = jobs.find(j => j.id === jobId);
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   if (!job) {
     return <div>Job not found</div>;
