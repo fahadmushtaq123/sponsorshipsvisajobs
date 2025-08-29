@@ -5,6 +5,7 @@ import { useState, useContext } from 'react';
 import { JobContext } from '../../context/JobContext';
 import { AuthContext } from '../../context/AuthContext';
 import ImageModal from '../../components/ImageModal';
+import imageCompression from 'browser-image-compression';
 
 export default function PakistanJobsClient() {
   const jobContext = useContext(JobContext);
@@ -30,20 +31,30 @@ export default function PakistanJobsClient() {
     setShowModal(true);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (jobImage) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        addJob({
-          title: jobTitle,
-          company: companyName,
-          location: `${city}, Pakistan`,
-          description: jobDetail,
-          image: reader.result as string,
-        });
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
       };
-      reader.readAsDataURL(jobImage);
+      try {
+        const compressedFile = await imageCompression(jobImage, options);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          addJob({
+            title: jobTitle,
+            company: companyName,
+            location: `${city}, Pakistan`,
+            description: jobDetail,
+            image: reader.result as string,
+          });
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error(error);
+      }
     } else {
       addJob({
         title: jobTitle,
