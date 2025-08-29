@@ -3,7 +3,7 @@
 import { createContext, useState, useEffect, ReactNode } from 'react';
 
 interface Job {
-  id: number;
+  id: string;
   title: string;
   company: string;
   location: string;
@@ -14,7 +14,7 @@ interface Job {
 interface JobContextType {
   jobs: Job[];
   addJob: (job: Omit<Job, 'id'>) => void;
-  deleteJob: (id: number) => void;
+  deleteJob: (id: string) => void;
 }
 
 export const JobContext = createContext<JobContextType | undefined>(undefined);
@@ -30,11 +30,7 @@ export const JobProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
       const data = await response.json();
-      const mappedJobs = data.map((job: any) => ({
-        ...job,
-        id: job._id
-      }));
-      setJobs(mappedJobs);
+      setJobs(data);
     } catch (error) {
       console.error('Failed to fetch jobs:', error);
     }
@@ -64,7 +60,7 @@ export const JobProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const deleteJob = async (id: number) => {
+  const deleteJob = async (id: string) => {
     try {
       const response = await fetch(`/api/jobs?id=${id}`, {
         method: 'DELETE',
