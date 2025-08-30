@@ -45,7 +45,20 @@ export async function GET(req: Request) {
 
     if (id) {
       // Fetch a single job
-      const job = await collection.findOne({ _id: new ObjectId(id) });
+      let job;
+      // Try to find by ObjectId first
+      if (id.match(/^[0-9a-fA-F]{24}$/)) {
+        job = await collection.findOne({ _id: new ObjectId(id) });
+      }
+
+      // If not found by ObjectId, try to find by integer id
+      if (!job) {
+        const numericId = parseInt(id, 10);
+        if (!isNaN(numericId)) {
+          job = await collection.findOne({ id: numericId });
+        }
+      }
+      
       if (!job) {
         return NextResponse.json({ message: "Job not found" }, { status: 404 });
       }
