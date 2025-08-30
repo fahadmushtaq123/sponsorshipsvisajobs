@@ -107,7 +107,7 @@ function JobsList() {
                   <Card.Subtitle className="mb-2 text-muted">{job.company}</Card.Subtitle>
                   <Card.Text>{job.location}</Card.Text>
                   <Button variant="primary" href={`/jobs/${job.id}`}>
-                    View Details
+                    More Detail
                   </Button>
                 </Card.Body>
               </Card>
