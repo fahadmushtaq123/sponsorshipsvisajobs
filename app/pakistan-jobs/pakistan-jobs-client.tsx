@@ -91,7 +91,7 @@ export default function PakistanJobsClient() {
                 <Card.Title>{job.title}</Card.Title>
                 <Card.Subtitle className="mb-2 text-muted">{job.company}</Card.Subtitle>
                 <Card.Text>{job.location}</Card.Text>
-                <Button variant="primary" href={`/jobs/${job.id}`} className="me-2">View Details</Button>
+                <Button variant="primary" href={`/jobs/${job.id}`} className="me-2">More Detail</Button>
                 {isAdmin && (
                   <Button variant="danger" onClick={() => deleteJob(job.id)}>Delete</Button>
                 )}
