@@ -10,5 +10,6 @@ module.exports = {
         stage: 3,
       },
     ],
+    'cssnano',
   ],
 };
