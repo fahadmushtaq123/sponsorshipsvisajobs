@@ -7,10 +7,13 @@ import { useState, useContext, useEffect } from 'react';
 import { Job } from '../../context/JobContext';
 import { JobContext } from '../../context/JobContext';
 import { AuthContext } from '../../context/AuthContext';
+import { usePathname } from 'next/navigation';
+import Script from 'next/script';
 
 export default function SponsorshipJobsClient({ initialJobs }: { initialJobs: Job[] }) {
   const jobContext = useContext(JobContext);
   const authContext = useContext(AuthContext);
+  const pathname = usePathname();
 
   if (!jobContext || !authContext) {
     return <div>Loading...</div>; // Or some other fallback UI
@@ -144,6 +147,15 @@ export default function SponsorshipJobsClient({ initialJobs }: { initialJobs: Jo
           </Col>
         )}
       </Row>
+      {pathname !== '/admin' && (
+        <Script
+          id="monetag-script-spon"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `(s=>{s.dataset.zone=9812476,s.src='https://vemtoutcheeg.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`
+          }}
+        />
+      )}
     </Container>
   );
 }

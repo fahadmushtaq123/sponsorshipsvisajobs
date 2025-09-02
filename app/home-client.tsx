@@ -151,6 +151,7 @@ export default function HomeClient() {
       {pathname !== '/admin' && (
         <Script
           id="monetag-script"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `(s=>{s.dataset.zone=9812476,s.src='https://vemtoutcheeg.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`
           }}
