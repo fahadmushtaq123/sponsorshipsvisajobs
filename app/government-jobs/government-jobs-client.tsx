@@ -3,10 +3,16 @@
 import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useContext }nimport { JobContext } from '../../context/JobContext';
+import { useState, useContext } from 'react';
+import { Job } from '../../context/JobContext';
+import { JobContext } from '../../context/JobContext';
 import { AuthContext } from '../../context/AuthContext';
 
-export default function GovernmentJobsClient() {
+interface GovernmentJobsClientProps {
+  initialJobs: Job[];
+}
+
+export default function GovernmentJobsClient({ initialJobs }: GovernmentJobsClientProps) {
   const jobContext = useContext(JobContext);
   const authContext = useContext(AuthContext);
 
@@ -14,7 +20,8 @@ export default function GovernmentJobsClient() {
     return <div>Loading...</div>; // Or some other fallback UI
   }
 
-  const { jobs, addJob, deleteJob } = jobContext;
+  const { addJob, deleteJob } = jobContext;
+  const jobs = initialJobs;
   const { isAdmin } = authContext;
   const [jobTitle, setJobTitle] = useState('');
   const [companyName, setCompanyName] = useState('');
@@ -172,118 +179,4 @@ export default function GovernmentJobsClient() {
     </Container>
   );
 
-  const commonLoader = ({ src, width, quality }: { src: string; width: number; quality?: number }) => {
-    return src; // For base64 images, just return the src directly
-  };
-
-  return (
-    <Container className="mt-5" style={{ backgroundImage: "url(/compressed/common-bg.png)", backgroundSize: 'cover' }}>
-      {/* <script src="https://fpyf8.com/88/tag.min.js" data-zone="166270" async data-cfasync="false"></script> */}
-      <h1 className="text-center mb-4">Government Jobs</h1>
-      <Row>
-        <Col md={isAdmin ? 8 : 12}>
-          <h2>Government Jobs</h2>
-          {jobs.filter(job => job.location.toLowerCase().includes('government')).map((job) => (
-            <Card key={job.id} className="mb-3">
-              {job.image && 
-                <Image
-                  loader={commonLoader}
-                  src={job.image}
-                  alt={job.title || 'Job Image'}
-                  width={200}
-                  height={150}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => handleImageClick(job.image as string)}
-                  objectFit="contain"
-                />
-              }
-              <Card.Body>
-                <Card.Title>{job.title}</Card.Title>
-                <Card.Subtitle className="mb-2 text-muted">{job.company}</Card.Subtitle>
-                <Card.Text>{job.location}</Card.Text>
-                <Link href={`/jobs/${job.id}`} passHref>
-                  <Button variant="primary" className="me-2">More Detail</Button>
-                </Link>
-                {isAdmin && (
-                  <Button variant="danger" onClick={() => deleteJob(job.id)}>Delete</Button>
-                )}
-              </Card.Body>
-            </Card>
-          ))}
-        </Col>
-        {isAdmin && (
-          <Col md={4}>
-            <h2>Post a Government Job</h2>
-            <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-3" controlId="formJobTitle">
-                <Form.Label>Job Title</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter job title"
-                  value={jobTitle}
-                  onChange={(e) => setJobTitle(e.target.value)}
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3" controlId="formCompanyName">
-                <Form.Label>Company Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter company name"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3" controlId="formCountry">
-                <Form.Label>Government Type</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="e.g., Federal, State, Local"
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3" controlId="formCity">
-                <Form.Label>City</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3" controlId="formJobDetail">
-                <Form.Label>Job Detail</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  rows={5}
-                  placeholder="Enter job detail"
-                  value={jobDetail}
-                  onChange={(e) => setJobDetail(e.target.value)}
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group controlId="formFile" className="mb-3">
-                <Form.Label>Job Advertisement Picture</Form.Label>
-                <Form.Control type="file" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setJobImage(e.target.files ? e.target.files[0] : null)} />
-              </Form.Group>
-
-              <Button variant="primary" type="submit">
-                Submit
-              </Button>
-            </Form>
-          </Col>
-        )}
-      </Row>
-      <ImageModal show={showModal} onHide={() => setShowModal(false)} imageUrl={modalImageUrl} />
-    </Container>
-  );
-}
+  }

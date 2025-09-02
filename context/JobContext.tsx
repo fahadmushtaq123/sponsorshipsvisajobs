@@ -2,9 +2,9 @@
 
 import { createContext, useState, useEffect, ReactNode } from 'react';
 
-interface Job {
+export interface Job {
   id: string;
-  title: string[];
+  title: string;
   company: string;
   location: string;
   description: string;
@@ -86,7 +86,7 @@ export const JobProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <JobContext.Provider value={{ jobs, addJob, deleteJob, currentPage, setCurrentPage, jobsPerPage, totalJobs }}>
+    <JobContext.Provider value={{ jobs, addJob, deleteJob, currentPage, setCurrentPage, jobsPerPage, totalJobs, setJobs }}>
       {children}
     </JobContext.Provider>
   );

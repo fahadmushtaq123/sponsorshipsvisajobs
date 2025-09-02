@@ -3,7 +3,8 @@
 import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
 import Link from 'next/link';
 
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
+import { Job } from '../../context/JobContext';
 import { JobContext } from '../../context/JobContext';
 import { AuthContext } from '../../context/AuthContext';
 

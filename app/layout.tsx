@@ -1,7 +1,8 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 import './globals.css';
 
 import ClientLayoutWrapper from "./ClientLayoutWrapper";
+// import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
