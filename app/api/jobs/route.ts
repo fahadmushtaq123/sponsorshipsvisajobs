@@ -1,7 +1,7 @@
 import { MongoClient, ServerApiVersion, Collection, ObjectId } from 'mongodb';
 import { NextResponse } from 'next/server';
 
-const uri = process.env.NEXT_PUBLIC_MONGODB_URI; // Use environment variable for security
+const uri = process.env.MONGODB_URI;
 
 let client: MongoClient | undefined;
 let jobsCollection: Collection | null = null;
@@ -66,11 +66,19 @@ export async function GET(req: Request) {
       const jobWithId = { ...job, id: job._id.toString() };
       return NextResponse.json(jobWithId, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
     } else {
-      // Fetch all jobs
-      const jobs = await collection.find({}).toArray();
+      // Fetch all jobs with pagination
+      const page = parseInt(searchParams.get('page') || '1', 10);
+      const limit = parseInt(searchParams.get('limit') || '10', 10); // Default to 10 jobs per page
+      const skip = (page - 1) * limit;
+
+      const totalJobs = await collection.countDocuments({});
+      const jobs = await collection.find({})
+                                   .skip(skip)
+                                   .limit(limit)
+                                   .toArray();
       // Map the _id to id for each job
       const jobsWithId = jobs.map(job => ({ ...job, id: job._id.toString() }));
-      return NextResponse.json(jobsWithId, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
+      return NextResponse.json({ jobs: jobsWithId, totalJobs }, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
     }
   } catch (error) {
     console.error("Failed to fetch jobs:", error);
@@ -85,6 +93,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Database not configured" }, { status: 503 });
     }
     const jobData = await req.json();
+    // Ensure title is an array
+    if (typeof jobData.title === 'string') {
+      jobData.title = jobData.title.split(',').map((t: string) => t.trim());
+    }
     const result = await collection.insertOne(jobData);
     return NextResponse.json({ message: "Job posted successfully", jobId: result.insertedId }, { status: 201 });
   } catch (error) {

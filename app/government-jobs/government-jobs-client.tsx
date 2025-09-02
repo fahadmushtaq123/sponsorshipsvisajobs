@@ -1,10 +1,10 @@
 'use client';
 
 import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
-import { useState, useContext } from 'react';
-import { JobContext } from '../../context/JobContext';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useState, useContext }nimport { JobContext } from '../../context/JobContext';
 import { AuthContext } from '../../context/AuthContext';
-import ImageModal from '../../components/ImageModal';
 
 export default function GovernmentJobsClient() {
   const jobContext = useContext(JobContext);
@@ -23,42 +23,157 @@ export default function GovernmentJobsClient() {
   const [jobDetail, setJobDetail] = useState('');
   const [jobImage, setJobImage] = useState<File | null>(null);
 
-  const [showModal, setShowModal] = useState(false);
-  const [modalImageUrl, setModalImageUrl] = useState('');
-
-  const handleImageClick = (imageUrl: string) => {
-    setModalImageUrl(imageUrl);
-    setShowModal(true);
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    let imageUrl: string | null = null;
+
     if (jobImage) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        addJob({
-          title: jobTitle,
-          company: companyName,
-          location: `${city}, ${country} Government`,
-          description: jobDetail,
-          image: reader.result as string,
+      const formData = new FormData();
+      formData.append('file', jobImage);
+
+      try {
+        const uploadResponse = await fetch('/api/upload-image', {
+          method: 'POST',
+          body: formData,
         });
-      };
-      reader.readAsDataURL(jobImage);
-    } else {
-      addJob({
-        title: jobTitle,
-        company: companyName,
-        location: `${city}, ${country} Government`,
-        description: jobDetail,
-        image: null,
-      });
+        const uploadData = await uploadResponse.json();
+        if (uploadResponse.ok) {
+          imageUrl = uploadData.imageUrl;
+        } else {
+          console.error('Image upload failed:', uploadData.message);
+          alert('Failed to upload image. Please try again.');
+          return; // Stop submission if image upload fails
+        }
+      } catch (error) {
+        console.error('Error during image upload:', error);
+        alert('Error uploading image. Please try again.');
+        return; // Stop submission if image upload fails
+      }
     }
+
+    addJob({
+      title: jobTitle,
+      company: companyName,
+      location: `${city}, ${country} Government`,
+      description: jobDetail,
+      image: imageUrl, // Save the Cloudinary URL
+    });
     setJobTitle('');
     setCompanyName(''); // Reset companyName
     setCity('');
     setJobDetail('');
     setJobImage(null);
+  };
+
+  return (
+    <Container className="mt-5" style={{ backgroundImage: "url(/compressed/common-bg.png)", backgroundSize: 'cover' }}>
+      <h1 className="text-center mb-4">Government Jobs</h1>
+      <Row>
+        <Col md={isAdmin ? 8 : 12}>
+          <h2>Government Jobs</h2>
+          {jobs.filter(job => job.location.toLowerCase().includes('government')).map((job) => (
+            <Card key={job.id} className="mb-3">
+              {job.image && 
+                <Image
+                  src={job.image}
+                  alt={job.title || 'Job Image'}
+                  width={200}
+                  height={150}
+                  style={{ cursor: 'pointer' }}
+                  objectFit="contain"
+                />
+              }
+              <Card.Body>
+                <Card.Title>{job.title}</Card.Title>
+                <Card.Subtitle className="mb-2 text-muted">{job.company}</Card.Subtitle>
+                <Card.Text>{job.location}</Card.Text>
+                <Link href={`/jobs/${job.id}`} passHref>
+                  <Button variant="primary" className="me-2">More Detail</Button>
+                </Link>
+                {isAdmin && (
+                  <Button variant="danger" onClick={() => deleteJob(job.id)}>Delete</Button>
+                )}
+              </Card.Body>
+            </Card>
+          ))}
+        </Col>
+        {isAdmin && (
+          <Col md={4}>
+            <h2>Post a Government Job</h2>
+            <Form onSubmit={handleSubmit}>
+              <Form.Group className="mb-3" controlId="formJobTitle">
+                <Form.Label>Job Title</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter job title"
+                  value={jobTitle}
+                  onChange={(e) => setJobTitle(e.target.value)}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="formCompanyName">
+                <Form.Label>Company Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter company name"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="formCountry">
+                <Form.Label>Government Type</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="e.g., Federal, State, Local"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="formCity">
+                <Form.Label>City</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter city"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="formJobDetail">
+                <Form.Label>Job Detail</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={5}
+                  placeholder="Enter job detail"
+                  value={jobDetail}
+                  onChange={(e) => setJobDetail(e.target.value)}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group controlId="formFile" className="mb-3">
+                <Form.Label>Job Advertisement Picture</Form.Label>
+                <Form.Control type="file" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setJobImage(e.target.files ? e.target.files[0] : null)} />
+              </Form.Group>
+
+              <Button variant="primary" type="submit">
+                Submit
+              </Button>
+            </Form>
+          </Col>
+        )}
+      </Row>
+    </Container>
+  );
+
+  const commonLoader = ({ src, width, quality }: { src: string; width: number; quality?: number }) => {
+    return src; // For base64 images, just return the src directly
   };
 
   return (
@@ -71,18 +186,24 @@ export default function GovernmentJobsClient() {
           {jobs.filter(job => job.location.toLowerCase().includes('government')).map((job) => (
             <Card key={job.id} className="mb-3">
               {job.image && 
-                <Card.Img 
-                  variant="top" 
-                  src={job.image} 
-                  style={{ maxWidth: '200px', cursor: 'pointer' }} 
-                  onClick={() => handleImageClick(job.image as string)} 
+                <Image
+                  loader={commonLoader}
+                  src={job.image}
+                  alt={job.title || 'Job Image'}
+                  width={200}
+                  height={150}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleImageClick(job.image as string)}
+                  objectFit="contain"
                 />
               }
               <Card.Body>
                 <Card.Title>{job.title}</Card.Title>
                 <Card.Subtitle className="mb-2 text-muted">{job.company}</Card.Subtitle>
                 <Card.Text>{job.location}</Card.Text>
-                <Button variant="primary" href={`/jobs/${job.id}`} className="me-2">More Detail</Button>
+                <Link href={`/jobs/${job.id}`} passHref>
+                  <Button variant="primary" className="me-2">More Detail</Button>
+                </Link>
                 {isAdmin && (
                   <Button variant="danger" onClick={() => deleteJob(job.id)}>Delete</Button>
                 )}

