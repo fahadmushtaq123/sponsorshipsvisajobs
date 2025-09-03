@@ -63,9 +63,9 @@ export const JobProvider = ({ children }: { children: ReactNode }) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const newJob = await response.json();
-      // Assuming the API returns the created job with an ID
-      setJobs(prevJobs => [{ ...newJob, id: newJob._id.toString() }, ...prevJobs]);
+      const { jobId } = await response.json();
+      const newJob = { ...job, id: jobId, createdAt: new Date() };
+      setJobs(prevJobs => [newJob, ...prevJobs]);
     } catch (error) {
       console.error('Failed to add job:', error);
     }
@@ -97,8 +97,10 @@ export const JobProvider = ({ children }: { children: ReactNode }) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const updatedJob = await response.json();
-      setJobs(prevJobs => prevJobs.map(j => (j.id === updatedJob.id ? { ...updatedJob, id: updatedJob._id.toString() } : j)));
+      const { updatedJob } = await response.json();
+      const { _id, ...rest } = updatedJob;
+      const newUpdatedJob = { ...rest, id: _id };
+      setJobs(prevJobs => prevJobs.map(j => (j.id === newUpdatedJob.id ? newUpdatedJob : j)));
     } catch (error) {
       console.error('Failed to edit job:', error);
     }
