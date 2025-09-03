@@ -15,7 +15,7 @@ export default function ResumeSubmissionPage() {
 
     if (file) {
       const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      const maxSize = 10 * 1024 * 1024; // 10MB
+      const maxSize = 4 * 1024 * 1024; // 4MB
 
       if (!allowedTypes.includes(file.type)) {
         setFileError('Invalid file type. Only PDF, DOC, and DOCX are allowed.');
@@ -38,7 +38,7 @@ export default function ResumeSubmissionPage() {
 
     if (file) {
       const allowedTypes = ['image/jpeg', 'image/png', 'image/gif']; // Common image types
-      const maxSize = 5 * 1024 * 1024; // Example: 5MB for screenshot
+      const maxSize = 3 * 1024 * 1024; // 3MB
 
       if (!allowedTypes.includes(file.type)) {
         setScreenshotError('Invalid file type. Only JPG, PNG, and GIF images are allowed.');

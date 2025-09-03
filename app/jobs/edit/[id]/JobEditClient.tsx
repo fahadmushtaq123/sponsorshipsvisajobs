@@ -30,9 +30,38 @@ export default function JobEditClient({ job }: JobEditClientProps) {
   const [description, setDescription] = useState(job.description);
   const [image, setImage] = useState(job.image);
   const [jobImageFile, setJobImageFile] = useState<File | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    setJobImageFile(null);
+    setImageError(null);
+
+    if (file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      const maxSize = 3 * 1024 * 1024; // 3MB
+
+      if (!allowedTypes.includes(file.type)) {
+        setImageError('Invalid file type. Only JPG, PNG, and GIF images are allowed.');
+        return;
+      }
+
+      if (file.size > maxSize) {
+        setImageError('Image size exceeds 3MB limit.');
+        return;
+      }
+
+      setJobImageFile(file);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (imageError) {
+      alert('Please correct the image error before submitting.');
+      return;
+    }
 
     if (jobImageFile) {
       const reader = new FileReader();
@@ -47,6 +76,9 @@ export default function JobEditClient({ job }: JobEditClientProps) {
           createdAt: job.createdAt,
         });
         router.push(`/jobs/${job.id}`);
+      };
+      reader.onerror = () => {
+        setImageError('Failed to read image. Please try again.');
       };
       reader.readAsDataURL(jobImageFile);
     } else {
@@ -112,7 +144,8 @@ export default function JobEditClient({ job }: JobEditClientProps) {
 
         <Form.Group controlId="formFile" className="mb-3">
           <Form.Label>Job Advertisement Picture (optional)</Form.Label>
-          <Form.Control type="file" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setJobImageFile(e.target.files ? e.target.files[0] : null)} />
+          <Form.Control type="file" onChange={handleImageChange} />
+          {imageError && <p style={{ color: 'red' }}>{imageError}</p>}
         </Form.Group>
 
         <Button variant="primary" type="submit">

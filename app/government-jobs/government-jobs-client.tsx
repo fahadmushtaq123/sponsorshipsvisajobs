@@ -42,7 +42,7 @@ export default function GovernmentJobsClient() {
 
     if (file) {
       const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      const maxSize = 3 * 1024 * 1024; // 3MB
 
       if (!allowedTypes.includes(file.type)) {
         setImageError('Invalid file type. Only JPG, PNG, and GIF images are allowed.');
@@ -75,6 +75,9 @@ export default function GovernmentJobsClient() {
           description: jobDetail,
           image: reader.result as string,
         });
+      };
+      reader.onerror = () => {
+        setImageError('Failed to read image. Please try again.');
       };
       reader.readAsDataURL(jobImage);
     } else {
