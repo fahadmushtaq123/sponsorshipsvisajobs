@@ -29,7 +29,9 @@ export async function POST(req: Request) {
   try {
     const collection = await getCollection();
     const jobData = await req.json();
+    console.log("Attempting to insert job data into the database...");
     const result = await collection.insertOne(jobData);
+    console.log("Job data inserted successfully. Result:", result);
     return NextResponse.json({ message: "Job posted successfully", jobId: result.insertedId }, { status: 201 });
   } catch (error) {
     console.error("Failed to post job:", error);
