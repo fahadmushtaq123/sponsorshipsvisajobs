@@ -22,7 +22,6 @@ export default function Header() {
           <Image
             src="/compressed/logo2.png"
             alt="Jobs Board Logo"
-<<<<<<< HEAD
             width={240}
             height={80}
             priority
@@ -59,4 +58,3 @@ export default function Header() {
     </Navbar>
   );
 }
->>>>>>> 37c2f8a4270fcdc2636f6bbaaf44e4a249ea9f57
