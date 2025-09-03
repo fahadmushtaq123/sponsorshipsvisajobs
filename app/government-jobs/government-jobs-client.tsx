@@ -25,6 +25,7 @@ export default function GovernmentJobsClient() {
   const [city, setCity] = useState('');
   const [jobDetail, setJobDetail] = useState('');
   const [jobImage, setJobImage] = useState<File | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   const [showModal, setShowModal] = useState(false);
   const [modalImageUrl, setModalImageUrl] = useState('');
@@ -34,8 +35,36 @@ export default function GovernmentJobsClient() {
     setShowModal(true);
   };
 
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    setJobImage(null); // Clear previous file
+    setImageError(null); // Clear previous error
+
+    if (file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+
+      if (!allowedTypes.includes(file.type)) {
+        setImageError('Invalid file type. Only JPG, PNG, and GIF images are allowed.');
+        return;
+      }
+
+      if (file.size > maxSize) {
+        setImageError('Image size exceeds 5MB limit.');
+        return;
+      }
+
+      setJobImage(file);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (imageError) {
+      alert('Please correct the image error before submitting.');
+      return;
+    }
+
     if (jobImage) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -58,10 +87,11 @@ export default function GovernmentJobsClient() {
       });
     }
     setJobTitle('');
-    setCompanyName(''); // Reset companyName
+    setCompanyName('');
     setCity('');
     setJobDetail('');
     setJobImage(null);
+    setImageError(null);
   };
 
   return (
@@ -156,7 +186,8 @@ export default function GovernmentJobsClient() {
 
               <Form.Group controlId="formFile" className="mb-3">
                 <Form.Label>Job Advertisement Picture</Form.Label>
-                <Form.Control type="file" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setJobImage(e.target.files ? e.target.files[0] : null)} />
+                <Form.Control type="file" onChange={handleImageChange} />
+                {imageError && <p style={{ color: 'red' }}>{imageError}</p>}
               </Form.Group>
 
               <Button variant="primary" type="submit">
