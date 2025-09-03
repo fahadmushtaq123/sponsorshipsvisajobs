@@ -1,11 +1,6 @@
-import { v2 as cloudinary } from 'cloudinary';
 import { NextResponse } from 'next/server';
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import { promises as fs } from 'fs';
+import path from 'path';
 
 export async function POST(req: Request) {
   try {
@@ -19,18 +14,18 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Upload to Cloudinary
-    const result = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream({}, (error, uploadResult) => {
-        if (error) {
-          console.error('Cloudinary upload error:', error);
-          return reject(error);
-        }
-        resolve(uploadResult);
-      }).end(buffer);
-    });
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+    // Ensure the uploads directory exists
+    await fs.mkdir(uploadDir, { recursive: true });
 
-    return NextResponse.json({ imageUrl: (result as any).secure_url }, { status: 200 });
+    const filename = `${Date.now()}-${file.name}`;
+    const filePath = path.join(uploadDir, filename);
+
+    await fs.writeFile(filePath, buffer);
+
+    const imageUrl = `/uploads/${filename}`; // Publicly accessible URL
+
+    return NextResponse.json({ imageUrl }, { status: 200 });
 
   } catch (error) {
     console.error('Error uploading image:', error);
