@@ -10,10 +10,18 @@ async function getCollection() {
   return db.collection("jobs");
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const title = searchParams.get('title');
     const collection = await getCollection();
-    const jobs = (await collection.find({}).sort({ _id: -1 }).toArray()).map(job => ({
+    
+    const query = {};
+    if (title) {
+      query.title = { $regex: title, $options: 'i' };
+    }
+
+    const jobs = (await collection.find(query).sort({ _id: -1 }).toArray()).map(job => ({
       ...job,
       _id: job._id.toString(),
       createdAt: new ObjectId(job._id).getTimestamp(),

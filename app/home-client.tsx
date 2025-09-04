@@ -1,7 +1,7 @@
 'use client';
 
 import { Container, Row, Col, Card, Form, Button, Pagination } from 'react-bootstrap';
-import { useContext, useState, useEffect, Suspense } from 'react';
+import { useContext, useState, useEffect, Suspense, useMemo } from 'react';
 import { JobContext } from '../context/JobContext';
 import { ScholarshipContext } from '../context/ScholarshipContext';
 import { AuthContext } from '../context/AuthContext';
@@ -9,36 +9,33 @@ import SplashScreen from '../components/SplashScreen';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { JOBS_PER_PAGE } from '../lib/config';
 
 const DynamicSplashScreen = dynamic(() => import('../components/SplashScreen'), {
   ssr: false, // Ensure it's only loaded on the client side
 });
 
-const JOBS_PER_PAGE = 12;
-
-function JobsList() {
-  const jobContext = useContext(JobContext);
-  const scholarshipContext = useContext(ScholarshipContext);
-  const authContext = useContext(AuthContext);
+function JobsList({ jobs, scholarships, isAdmin, deleteJob }) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
   const searchParams = useSearchParams();
   const title = searchParams.get('title');
 
-  if (!jobContext || !scholarshipContext || !authContext) {
-    return <div>Loading...</div>; // Or some other fallback UI
-  }
+  const filteredJobs = useMemo(() => {
+    let filtered = title ? jobs.filter(job => job.title === title) : jobs;
+    if (searchTerm) {
+      filtered = filtered.filter(job =>
+        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.location.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    return filtered;
+  }, [jobs, title, searchTerm]);
 
-  const { jobs, deleteJob } = jobContext;
-  const { scholarships } = scholarshipContext;
-  const { isAdmin } = authContext;
-
-  const filteredJobs = title
-    ? jobs.filter(job => job.title === title)
-    : jobs;
-
-  const governmentJobsCount = jobs.filter(job => job.location && job.location.toLowerCase().includes('government')).length;
-  const sponsorshipJobsCount = jobs.filter(job => job.location && job.location.toLowerCase().includes('sponsorship')).length;
-  const scholarshipsCount = scholarships.length;
+  const governmentJobsCount = useMemo(() => jobs.filter(job => job.location && job.location.toLowerCase().includes('government')).length, [jobs]);
+  const sponsorshipJobsCount = useMemo(() => jobs.filter(job => job.location && job.location.toLowerCase().includes('sponsorship')).length, [jobs]);
+  const scholarshipsCount = useMemo(() => scholarships.length, [scholarships]);
 
   const totalPages = Math.ceil(filteredJobs.length / JOBS_PER_PAGE);
   const startIndex = (currentPage - 1) * JOBS_PER_PAGE;
@@ -49,16 +46,26 @@ function JobsList() {
     setCurrentPage(page);
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    // The filtering is now handled by the useMemo hook, so we just need to update the search term
+  };
+
   return (
     <main>
       <Container className="mt-5">
         <h1 className="text-center mb-4">{ title ? `Jobs for "${title}"` : "Find Your Next Sponsorship Visa Job"}</h1>
         <Row className="mb-4">
           <Col md={8} className="mx-auto">
-            <Form>
+            <Form onSubmit={handleSearch}>
               <Row>
                 <Col md={9}>
-                  <Form.Control type="text" placeholder="Search for jobs..." />
+                  <Form.Control
+                    type="text"
+                    placeholder="Search for jobs..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </Col>
                 <Col md={3}>
                   <Button variant="primary" type="submit" className="w-100">
@@ -136,24 +143,30 @@ function JobsList() {
   );
 }
 
-export default function HomeClient() {
-  const [showSplash, setShowSplash] = useState(true);
+function HomeClientWithData() {
+  const jobContext = useContext(JobContext);
+  const scholarshipContext = useContext(ScholarshipContext);
+  const authContext = useContext(AuthContext);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (showSplash) {
+  if (!jobContext || !scholarshipContext || !authContext) {
     return <DynamicSplashScreen />;
   }
 
+  const { jobs, deleteJob, loading: jobsLoading } = jobContext;
+  const { scholarships, loading: scholarshipsLoading } = scholarshipContext;
+  const { isAdmin } = authContext;
+
+  if (jobsLoading || scholarshipsLoading) {
+    return <DynamicSplashScreen />;
+  }
+
+  return <JobsList jobs={jobs} scholarships={scholarships} isAdmin={isAdmin} deleteJob={deleteJob} />;
+}
+
+export default function HomeClient() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <JobsList />
+    <Suspense fallback={<DynamicSplashScreen />}>
+      <HomeClientWithData />
     </Suspense>
   );
 }

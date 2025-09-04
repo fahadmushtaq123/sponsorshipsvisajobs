@@ -1,7 +1,7 @@
 'use client';
 
 import { Container, Form, Button } from 'react-bootstrap';
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext } from 'react';
 import { JobContext } from '../../../../context/JobContext';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
@@ -55,7 +55,7 @@ export default function JobEditClient({ job }: JobEditClientProps) {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (imageError) {
@@ -63,36 +63,40 @@ export default function JobEditClient({ job }: JobEditClientProps) {
       return;
     }
 
+    let imageUrl = image;
+
     if (jobImageFile) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        editJob({
-          id: job.id,
-          title: jobTitle,
-          company: companyName,
-          location: location,
-          description: description,
-          image: reader.result as string,
-          createdAt: job.createdAt,
+      const formData = new FormData();
+      formData.append('file', jobImageFile);
+
+      try {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
         });
-        router.push(`/jobs/${job.id}`);
-      };
-      reader.onerror = () => {
-        setImageError('Failed to read image. Please try again.');
-      };
-      reader.readAsDataURL(jobImageFile);
-    } else {
-      editJob({
-        id: job.id,
-        title: jobTitle,
-        company: companyName,
-        location: location,
-        description: description,
-        image: image, // Keep existing image if no new file is uploaded
-        createdAt: job.createdAt,
-      });
-      router.push(`/jobs/${job.id}`);
+
+        if (!response.ok) {
+          throw new Error('Image upload failed');
+        }
+
+        const data = await response.json();
+        imageUrl = data.url;
+      } catch (error) {
+        setImageError('Failed to upload image. Please try again.');
+        return;
+      }
     }
+
+    editJob({
+      id: job.id,
+      title: jobTitle,
+      company: companyName,
+      location: location,
+      description: description,
+      image: imageUrl,
+      createdAt: job.createdAt,
+    });
+    router.push(`/jobs/${job.id}`);
   };
 
   return (
@@ -134,11 +138,11 @@ export default function JobEditClient({ job }: JobEditClientProps) {
 
         <Form.Group className="mb-3" controlId="formDescription">
           <Form.Label>Description</Form.Label>
-          <DynamicReactQuill 
-            theme="snow" 
-            value={description} 
-            onChange={setDescription} 
-            style={{ height: '200px', marginBottom: '50px' }} 
+          <DynamicReactQuill
+            theme="snow"
+            value={description}
+            onChange={setDescription}
+            style={{ height: '200px', marginBottom: '50px' }}
           />
         </Form.Group>
 
@@ -155,3 +159,4 @@ export default function JobEditClient({ job }: JobEditClientProps) {
     </Container>
   );
 }
+

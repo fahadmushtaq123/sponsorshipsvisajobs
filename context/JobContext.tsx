@@ -1,7 +1,7 @@
 
 'use client';
 
-import { createContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
 
 interface Job {
   id: string;
@@ -16,6 +16,7 @@ interface Job {
 interface JobContextType {
   jobs: Job[];
   loading: boolean;
+  fetchJobs: (title?: string) => void;
   addJob: (job: Omit<Job, 'id' | 'createdAt'>) => void;
   deleteJob: (id: string) => void;
   editJob: (job: Job) => void;
@@ -27,31 +28,32 @@ export const JobProvider = ({ children }: { children: ReactNode }) => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch jobs from API on component mount
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const response = await fetch('/api/jobs');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        // Map _id to id
-        const mappedJobs = data.map((job: any) => ({
-          ...job,
-          id: job._id // Assuming _id is always present
-        }));
-        setJobs(mappedJobs);
-      } catch (error) {
-        console.error('Failed to fetch jobs:', error);
-      } finally {
-        setLoading(false);
+  const fetchJobs = useCallback(async (title?: string) => {
+    setLoading(true);
+    try {
+      const url = title ? `/api/jobs?title=${encodeURIComponent(title)}` : '/api/jobs';
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
-    fetchJobs();
+      const data = await response.json();
+      const mappedJobs = data.map((job: any) => ({
+        ...job,
+        id: job._id
+      }));
+      setJobs(mappedJobs);
+    } catch (error) {
+      console.error('Failed to fetch jobs:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-    const addJob = async (job: Omit<Job, 'id' | 'createdAt'>) => {
+  useEffect(() => {
+    fetchJobs();
+  }, [fetchJobs]);
+
+  const addJob = async (job: Omit<Job, 'id' | 'createdAt'>) => {
     try {
       const response = await fetch('/api/jobs', {
         method: 'POST',
@@ -106,8 +108,8 @@ export const JobProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-    return (
-    <JobContext.Provider value={{ jobs, loading, addJob, deleteJob, editJob }}>
+  return (
+    <JobContext.Provider value={{ jobs, loading, fetchJobs, addJob, deleteJob, editJob }}>
       {children}
     </JobContext.Provider>
   );
