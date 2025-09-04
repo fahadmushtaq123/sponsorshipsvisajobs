@@ -12,6 +12,7 @@ interface Scholarship {
 
 interface ScholarshipContextType {
   scholarships: Scholarship[];
+  loading: boolean;
   addScholarship: (scholarship: Omit<Scholarship, 'id'>) => void;
   deleteScholarship: (id: number) => void;
 }
@@ -20,7 +21,7 @@ export const ScholarshipContext = createContext<ScholarshipContextType | undefin
 
 export const ScholarshipProvider = ({ children }: { children: ReactNode }) => {
   const [scholarships, setScholarships] = useState<Scholarship[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     try {
@@ -33,19 +34,20 @@ export const ScholarshipProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error('Error loading scholarships from localStorage', error);
       setScholarships([]);
+    } finally {
+      setLoading(false);
     }
-    setIsLoaded(true);
   }, []);
 
   useEffect(() => {
-    if (isLoaded) {
+    if (!loading) { // Only save to localStorage once loading is complete
       try {
         localStorage.setItem('scholarships', JSON.stringify(scholarships));
       } catch (error) {
         console.error('Error saving scholarships to localStorage', error);
       }
     }
-  }, [scholarships, isLoaded]);
+  }, [scholarships, loading]);
 
   const addScholarship = (scholarship: Omit<Scholarship, 'id'>) => {
     const newScholarship = { ...scholarship, id: scholarships.length > 0 ? Math.max(...scholarships.map(s => s.id)) + 1 : 1 };
@@ -57,7 +59,7 @@ export const ScholarshipProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <ScholarshipContext.Provider value={{ scholarships, addScholarship, deleteScholarship }}>
+    <ScholarshipContext.Provider value={{ scholarships, loading, addScholarship, deleteScholarship }}>
       {children}
     </ScholarshipContext.Provider>
   );
