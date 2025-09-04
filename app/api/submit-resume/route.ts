@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs/promises';
+import { v2 as cloudinary } from 'cloudinary';
+import clientPromise from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
+
+cloudinary.config({
+  cloudinary_url: process.env.CLOUDINARY_URL,
+});
+
+async function getCollection() {
+  const client = await clientPromise;
+  const db = client.db("job_board_db");
+  return db.collection("submissions");
+}
 
 export async function POST(request: Request) {
   try {
@@ -11,47 +22,49 @@ export async function POST(request: Request) {
     const resume = formData.get('resume') as File;
     const screenshot = formData.get('screenshot') as File;
 
-    // Define upload directory
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    await fs.mkdir(uploadDir, { recursive: true });
+    let resumeUrl = '';
+    let screenshotUrl = '';
 
-    // Save resume file
-    const resumeFileName = `${Date.now()}-${resume.name}`;
-    const resumeFilePath = path.join(uploadDir, resumeFileName);
-    const resumeBuffer = Buffer.from(await resume.arrayBuffer());
-    await fs.writeFile(resumeFilePath, resumeBuffer);
-
-    // Save screenshot file
-    const screenshotFileName = `${Date.now()}-${screenshot.name}`;
-    const screenshotFilePath = path.join(uploadDir, screenshotFileName);
-    const screenshotBuffer = Buffer.from(await screenshot.arrayBuffer());
-    await fs.writeFile(screenshotFilePath, screenshotBuffer);
-
-    // Save submission details to a JSON file
-    const submissionsFilePath = path.join(process.cwd(), 'submissions.json');
-    let submissions = [];
-    try {
-      const existingSubmissions = await fs.readFile(submissionsFilePath, 'utf8');
-      submissions = JSON.parse(existingSubmissions);
-    } catch (error) {
-      // File might not exist yet, start with an empty array
-      console.log('No existing submissions file, creating new one.');
+    // Upload resume to Cloudinary
+    if (resume) {
+      const bytes = await resume.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream({ folder: "resumes", resource_type: "raw" }, (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }).end(buffer);
+      });
+      resumeUrl = (result as any).secure_url;
     }
 
+    // Upload screenshot to Cloudinary
+    if (screenshot) {
+      const bytes = await screenshot.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream({ folder: "screenshots" }, (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }).end(buffer);
+      });
+      screenshotUrl = (result as any).secure_url;
+    }
+
+    // Save submission details to MongoDB
+    const collection = await getCollection();
     const newSubmission = {
-      id: Date.now(),
       firstName,
       secondName,
       profession,
-      resumePath: `/uploads/${resumeFileName}`,
-      screenshotPath: `/uploads/${screenshotFileName}`,
+      resumeUrl,
+      screenshotUrl,
       submissionDate: new Date().toISOString(),
     };
 
-    submissions.push(newSubmission);
-    await fs.writeFile(submissionsFilePath, JSON.stringify(submissions, null, 2));
+    const result = await collection.insertOne(newSubmission);
 
-    return NextResponse.json({ message: 'Submission successful!', submission: newSubmission }, { status: 200 });
+    return NextResponse.json({ message: 'Submission successful!', submissionId: result.insertedId.toString() }, { status: 200 });
   } catch (error) {
     console.error('Submission error:', error);
     return NextResponse.json({ message: 'Submission failed!', error: (error as Error).message }, { status: 500 });

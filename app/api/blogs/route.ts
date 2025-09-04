@@ -1,56 +1,86 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import clientPromise from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
 
-const blogsFilePath = path.join(process.cwd(), 'data', 'blogs.json');
-
-function readBlogs() {
-  try {
-    const blogsData = fs.readFileSync(blogsFilePath, 'utf-8');
-    return JSON.parse(blogsData);
-  } catch (error) {
-    console.error('Error reading blogs.json:', error);
-    return [];
-  }
-}
-
-function writeBlogs(blogs: any[]) {
-  try {
-    fs.writeFileSync(blogsFilePath, JSON.stringify(blogs, null, 2), 'utf-8');
-  } catch (error) {
-    console.error('Error writing blogs.json:', error);
-  }
+async function getCollection() {
+  const client = await clientPromise;
+  const db = client.db("job_board_db"); // Assuming the same database as jobs
+  return db.collection("blogs");
 }
 
 export async function GET() {
-  const blogs = readBlogs();
-  return NextResponse.json(blogs);
+  try {
+    const collection = await getCollection();
+    const blogs = (await collection.find({}).sort({ _id: -1 }).toArray()).map(blog => ({
+      ...blog,
+      id: blog._id.toString(),
+      createdAt: new ObjectId(blog._id).getTimestamp(),
+    }));
+    return NextResponse.json(blogs);
+  } catch (error) {
+    console.error("Failed to fetch blogs:", error);
+    return NextResponse.json({ message: "Failed to fetch blogs", error: (error as Error).message }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
-  const newBlog = await request.json();
-  const blogs = readBlogs();
-  const newId = blogs.length > 0 ? Math.max(...blogs.map((b: any) => b.id)) + 1 : 1;
-  const blogWithId = { ...newBlog, id: newId };
-  blogs.unshift(blogWithId); // Add to the beginning
-  writeBlogs(blogs);
-  return NextResponse.json(blogWithId, { status: 201 });
+  try {
+    const collection = await getCollection();
+    const newBlog = await request.json();
+    const result = await collection.insertOne(newBlog);
+    const blogWithId = { ...newBlog, id: result.insertedId.toString(), createdAt: new ObjectId(result.insertedId).getTimestamp() };
+    return NextResponse.json(blogWithId, { status: 201 });
+  } catch (error) {
+    console.error("Failed to post blog:", error);
+    return NextResponse.json({ message: "Failed to post blog", error: (error as Error).message }, { status: 500 });
+  }
 }
 
 export async function PUT(request: Request) {
-  const updatedBlog = await request.json();
-  let blogs = readBlogs();
-  blogs = blogs.map((blog: any) =>
-    blog.id === updatedBlog.id ? updatedBlog : blog
-  );
-  writeBlogs(blogs);
-  return NextResponse.json(updatedBlog);
+  try {
+    const collection = await getCollection();
+    const updatedBlog = await request.json();
+    const { id, ...updateData } = updatedBlog;
+
+    if (!id) {
+      return NextResponse.json({ message: "Blog ID is required for update" }, { status: 400 });
+    }
+
+    const result = await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return NextResponse.json({ message: "Blog not found" }, { status: 404 });
+    }
+
+    const blog = await collection.findOne({ _id: new ObjectId(id) });
+    return NextResponse.json({ ...blog, id: blog?._id.toString() });
+  } catch (error) {
+    console.error("Failed to update blog:", error);
+    return NextResponse.json({ message: "Failed to update blog", error: (error as Error).message }, { status: 500 });
+  }
 }
 
 export async function DELETE(request: Request) {
-  const { id } = await request.json();
-  let blogs = readBlogs();
-  blogs = blogs.filter((blog: any) => blog.id !== id);
-  writeBlogs(blogs);
-  return NextResponse.json({ message: 'Blog deleted' });
+  try {
+    const collection = await getCollection();
+    const { id } = await request.json();
+
+    if (!id) {
+      return NextResponse.json({ message: "Blog ID is required" }, { status: 400 });
+    }
+
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ message: "Blog not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Blog deleted" });
+  } catch (error) {
+    console.error("Failed to delete blog:", error);
+    return NextResponse.json({ message: "Failed to delete blog", error: (error as Error).message }, { status: 500 });
+  }
 }
