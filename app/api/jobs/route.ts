@@ -16,7 +16,7 @@ export async function GET(req: Request) {
     const title = searchParams.get('title');
     const collection = await getCollection();
     
-    const query = {};
+    const query: any = {};
     if (title) {
       query.title = { $regex: title, $options: 'i' };
     }

@@ -1,1 +1,1 @@
-feat: Implement image upload and performance improvements
+fix: Create uploads directory if it doesn't exist
