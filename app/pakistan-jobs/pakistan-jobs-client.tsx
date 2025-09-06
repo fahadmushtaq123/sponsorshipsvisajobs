@@ -6,6 +6,7 @@ import { JobContext } from '../../context/JobContext';
 import { AuthContext } from '../../context/AuthContext';
 import ImageModal from '../../components/ImageModal';
 import dynamic from 'next/dynamic';
+import Script from 'next/script';
 
 const DynamicReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
@@ -65,6 +66,7 @@ export default function PakistanJobsClient() {
 
   return (
     <Container className="mt-5" style={{ backgroundImage: "url(/compressed/common-bg.png)", backgroundSize: 'cover' }}>
+      <Script src="https://www.revenuecpmgate.com/wj90i77z15?key=fbe2fa2c6e115e6845204ea4f63780a2" />
       <h1 className="text-center mb-4">Pakistan Jobs</h1>
       <Row>
         <Col md={isAdmin ? 8 : 12}>
