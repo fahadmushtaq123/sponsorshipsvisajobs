@@ -5,6 +5,8 @@ export const metadata = {
 
 
 
+import Script from 'next/script';
+
 export default function ToolsLayout({
   children,
 }: {
@@ -12,7 +14,7 @@ export default function ToolsLayout({
 }) {
   return (
     <>
-      
+      <Script src="https://fpyf8.com/88/tag.min.js" data-zone="169079" async data-cfasync="false" strategy="beforeInteractive" />
       {children}
     </>
   );
