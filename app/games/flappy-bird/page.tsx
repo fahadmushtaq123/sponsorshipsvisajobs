@@ -14,17 +14,31 @@ const FlappyBirdGame = () => {
   const frame = useRef(0);
   const gameOver = useRef(false);
 
+  const [canvasDimensions, setCanvasDimensions] = useState({ width: 800, height: 600 });
+
   useEffect(() => {
+    const handleResize = () => {
+      const newWidth = Math.min(window.innerWidth * 0.9, 800); // Max 800px width
+      const newHeight = (newWidth / 4) * 3; // Maintain 4:3 aspect ratio
+      setCanvasDimensions({ width: newWidth, height: newHeight });
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Set initial dimensions
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const gravity = 0.5;
-    const jumpStrength = -8;
-    const pipeWidth = 60;
-    const pipeGap = 200;
+    canvas.width = canvasDimensions.width;
+    canvas.height = canvasDimensions.height;
+
+    const gravity = 0.5 * (canvasDimensions.height / 600); // Scale gravity
+    const jumpStrength = -8 * (canvasDimensions.height / 600); // Scale jump strength
+    const pipeWidth = 60 * (canvasDimensions.width / 800); // Scale pipe width
+    const pipeGap = 200 * (canvasDimensions.height / 600); // Scale pipe gap
 
     const resetGame = () => {
       bird.current = { x: 50, y: 150, width: 34, height: 24, velocity: 0 };
@@ -225,8 +239,8 @@ const FlappyBirdGame = () => {
       <h1>Flappy Bird</h1>
       <canvas
         ref={canvasRef}
-        width={800}
-        height={600}
+        width={canvasDimensions.width}
+        height={canvasDimensions.height}
         style={{ border: '1px solid black', borderRadius: '8px' }}
       ></canvas>
       {isGameOver && (
