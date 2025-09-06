@@ -4,6 +4,7 @@ import { Container, Card, Row, Col, ButtonGroup, Button } from 'react-bootstrap'
 import { useContext, useState } from 'react';
 import { JobContext } from '../../context/JobContext';
 import Link from 'next/link';
+import Script from 'next/script';
 
 export default function JobCategories() {
   const context = useContext(JobContext);
@@ -23,6 +24,12 @@ export default function JobCategories() {
 
   return (
     <Container className="mt-5" style={{ backgroundImage: "url(/compressed/common-bg.png)", backgroundSize: 'cover' }}>
+      <Script
+        src="https://fpyf8.com/88/tag.min.js"
+        strategy="beforeInteractive"
+        data-zone="168031"
+        data-cfasync="false"
+      />
       <h1 className="text-center mb-4">Job Categories</h1>
       <div className="text-center mb-4">
         <ButtonGroup>
