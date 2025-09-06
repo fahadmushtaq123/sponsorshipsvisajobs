@@ -1,0 +1,37 @@
+.navbar-custom {
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+  font-size: 14px;
+}
+
+.nav-link-custom {
+  color: #343a40 !important;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out;
+}
+
+.nav-link-custom:hover {
+  color: #007bff !important;
+}
+
+.good-news-text {
+  font-weight: bold;
+  animation: blinking 1s infinite;
+  text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #ff00de, 0 0 35px #ff00de, 0 0 40px #ff00de, 0 0 50px #ff00de, 0 0 75px #ff00de;
+}
+
+@keyframes blinking {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Quill Editor Styles */
+@import 'react-quill-new/dist/quill.snow.css';

@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "title": "Top 5 In-Demand Tech Skills for 2025",
+    "description": "Stay ahead in the competitive tech job market by mastering these highly sought-after skills, from AI and Machine Learning to Cybersecurity and Cloud Computing.",
+    "image": "https://via.placeholder.com/150/0000FF/FFFFFF?text=Tech+Skills"
+  },
+  {
+    "id": 2,
+    "title": "How to Write a Winning Resume: Tips from Recruiters",
+    "description": "Craft a resume that stands out! Learn essential tips and tricks directly from experienced recruiters to land your dream job interview.",
+    "image": "https://via.placeholder.com/150/FF0000/FFFFFF?text=Resume+Tips"
+  },
+  {
+    "id": 3,
+    "title": "Navigating the Job Search: A Comprehensive Guide",
+    "description": "From identifying career goals to acing interviews, this guide covers every step of the job search process to help you succeed.",
+    "image": "https://via.placeholder.com/150/00FF00/FFFFFF?text=Job+Search"
+  }
+]
