@@ -1,1 +1,1 @@
-feat: add revenuecpmgate script to jobs pages
+fix: Add loading state to ScholarshipContext
