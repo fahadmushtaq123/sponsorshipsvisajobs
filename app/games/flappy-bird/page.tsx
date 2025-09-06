@@ -155,7 +155,11 @@ const FlappyBirdGame = () => {
 
         // Update score
         if (pipe.x + pipe.width < bird.current.x && !pipe.passed) {
-          setScore(prevScore => prevScore + 1);
+          console.log(`Pipe passed! Pipe right edge: ${pipe.x + pipe.width}, Bird x: ${bird.current.x}`);
+          setScore(prevScore => {
+            console.log(`Score updated from ${prevScore} to ${prevScore + 1}`);
+            return prevScore + 1;
+          });
           pipe.passed = true;
         }
       });
