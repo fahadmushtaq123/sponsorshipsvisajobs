@@ -68,11 +68,7 @@ export default function PakistanJobsClient() {
     <Container className="mt-5" style={{ backgroundImage: "url(/compressed/common-bg.png)", backgroundSize: 'cover' }}>
       <Script src="https://www.revenuecpmgate.com/wj90i77z15?key=fbe2fa2c6e115e6845204ea4f63780a2" strategy="beforeInteractive" />
       <h1 className="text-center mb-4">Pakistan Jobs</h1>
-      {!isAdmin && (
-        <div className="text-center mb-4">
-          <a href="https://www.revenuecpmgate.com/wj90i77z15?key=fbe2fa2c6e115e6845204ea4f63780a2">Click here for more information</a>
-        </div>
-      )}
+      
       <Row>
         <Col md={isAdmin ? 8 : 12}>
           <h2>Jobs in Pakistan</h2>
