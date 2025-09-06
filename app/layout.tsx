@@ -1,11 +1,7 @@
-'use client';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './globals.css';
 
-import ClientLayoutWrapper from './ClientLayoutWrapper';
-import { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import RootLayoutClient from './layout.client';
 
 export const metadata = {
   title: 'Sponsorship Visa Jobs - Find Your Next Career Opportunity',
@@ -17,18 +13,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const authContext = useContext(AuthContext);
-  const isAdmin = authContext?.isAdmin;
-
   return (
     <html lang="en">
       <head>
-        {!isAdmin && (
-          <script dangerouslySetInnerHTML={{ __html: "(function(s){s.dataset.zone='9773560',s.src='https://vemtoutcheeg.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))" }} />
-        )}
       </head>
       <body>
-        <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+        <RootLayoutClient>{children}</RootLayoutClient>
       </body>
     </html>
   );
