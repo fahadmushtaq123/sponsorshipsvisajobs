@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Container, Row, Col, Form, Button, Card, Modal } from 'react-bootstrap';
@@ -6,6 +5,33 @@ import { useState, useContext } from 'react';
 import { BlogContext } from '../../context/BlogContext';
 import { AuthContext } from '../../context/AuthContext';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import Script from 'next/script';
+
+const AdComponent = () => {
+  return (
+    <div className="my-3">
+      <Script
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6708928200370482"
+        crossOrigin="anonymous"
+        strategy="afterInteractive"
+      />
+      <ins className="adsbygoogle"
+          style={{ display: 'block', textAlign: 'center' }}
+          data-ad-layout="in-article"
+          data-ad-format="fluid"
+          data-ad-client="ca-pub-6708928200370482"
+          data-ad-slot="6441282979"></ins>
+      <Script
+        id="adsbygoogle-init-blogs"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `(adsbygoogle = window.adsbygoogle || []).push({});`,
+        }}
+      />
+    </div>
+  );
+};
 
 // Define modules and formats for ReactQuill
 const modules = {
@@ -41,6 +67,7 @@ import { Blog } from '../../context/BlogContext'; // Import Blog interface
 export default function Blogs() {
   const blogContext = useContext(BlogContext);
   const authContext = useContext(AuthContext);
+  const [copied, setCopied] = useState(false);
 
   if (!blogContext || !authContext) {
     return <div>Loading...</div>;
@@ -128,33 +155,63 @@ export default function Blogs() {
     }
   };
 
+  const handleShare = async (blog: Blog) => {
+    const shareData = {
+      title: blog.title,
+      text: `Check out this blog post: ${blog.title}`,
+      url: `${window.location.origin}/blogs/${blog.slug}`,
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    } else {
+      navigator.clipboard.writeText(shareData.url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <Container className="mt-5">
       <h1 className="text-center mb-4">Blogs</h1>
       <Row>
         <Col md={isAdmin ? 8 : 12}>
           <h2>Latest Blogs</h2>
-          {blogs.map((blog) => (
-            <Card key={blog.id} className="mb-3">
-              {blog.image && (
-                <Card.Img
-                  variant="top"
-                  src={blog.image}
-                  style={{ width: blog.imageWidth || '100%', height: blog.imageHeight || 'auto', objectFit: 'contain' }}
-                />
-              )}
-              <Card.Body>
-                <Card.Title>{blog.title}</Card.Title>
-                <Card.Text dangerouslySetInnerHTML={{ __html: blog.description }} />
-                {isAdmin && (
-                  <>
-                    <Button variant="secondary" className="me-2" onClick={() => handleEditClick(blog)}>Edit</Button>
-                    <Button variant="danger" onClick={() => deleteBlog(blog.id)}>Delete</Button>
-                  </>
+          {blogs.flatMap((blog, index) => {
+            const blogCard = (
+              <Card key={blog.id} id={blog.slug} className="mb-3">
+                {blog.image && (
+                  <Card.Img
+                    variant="top"
+                    src={blog.image}
+                    style={{ width: blog.imageWidth || '100%', height: blog.imageHeight || 'auto', objectFit: 'contain' }}
+                  />
                 )}
-              </Card.Body>
-            </Card>
-          ))}
+                <Card.Body>
+                  <div className="d-flex justify-content-between align-items-start">
+                    <Link href={`/blogs/${blog.slug}`} passHref>
+                      <Card.Title as="a">{blog.title}</Card.Title>
+                    </Link>
+                    <Button variant="outline-primary" onClick={() => handleShare(blog)}>
+                      {copied ? 'Copied!' : 'Share'}
+                    </Button>
+                  </div>
+                  <Card.Text dangerouslySetInnerHTML={{ __html: blog.description }} />
+                  {isAdmin && (
+                    <>
+                      <Button variant="secondary" className="me-2" onClick={() => handleEditClick(blog)}>Edit</Button>
+                      <Button variant="danger" onClick={() => deleteBlog(blog.id)}>Delete</Button>
+                    </>
+                  )}
+                </Card.Body>
+              </Card>
+            );
+
+            return [blogCard, <AdComponent key={`ad-${index}`} />];
+          })}
         </Col>
         {isAdmin && (
           <Col md={4}>

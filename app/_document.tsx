@@ -5,11 +5,8 @@ export default function Document() {
     <Html>
       <Head>
         {/* Google AdSense */}
-        <script
-          data-ad-client="ca-pub-YOUR_ADSENSE_ID" // Replace with your actual AdSense client ID
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
-        ></script>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6708928200370482"
+          crossOrigin="anonymous"></script>
       </Head>
       <body>
         <Main />

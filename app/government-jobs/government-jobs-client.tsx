@@ -12,6 +12,7 @@ const DynamicReactQuill = dynamic(() => import('react-quill-new'), { ssr: false 
 export default function GovernmentJobsClient() {
   const jobContext = useContext(JobContext);
   const authContext = useContext(AuthContext);
+  const [copied, setCopied] = useState(false);
 
   if (!jobContext || !authContext) {
     return <div>Loading...</div>; // Or some other fallback UI
@@ -97,6 +98,25 @@ export default function GovernmentJobsClient() {
     setImageError(null);
   };
 
+  const handleShare = async (job: any) => {
+    const shareData = {
+      title: job.title,
+      text: `Check out this job: ${job.title} at ${job.company}`,
+      url: `${window.location.origin}/jobs/${job.id}`,
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    } else {
+      navigator.clipboard.writeText(shareData.url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <Container className="mt-5" style={{ backgroundImage: "url(/compressed/common-bg.png)", backgroundSize: 'cover' }}>
       <h1 className="text-center mb-4">Government Jobs</h1>
@@ -115,10 +135,13 @@ export default function GovernmentJobsClient() {
               }
               <Card.Body>
                 <Card.Title>{job.title}</Card.Title>
-                <Card.Subtitle className="mb-2 text-muted">{job.company}</Card.Subtitle>
-                <Card.Text>{job.location}</Card.Text>
+                <Card.Subtitle className="mb-2 text-muted"><b>Company:</b> {job.company}</Card.Subtitle>
+                <Card.Text><b>City:</b> {job.location}</Card.Text>
                 <Card.Text><small className="text-muted">Posted on: {new Date(job.createdAt).toLocaleDateString()}</small></Card.Text>
                 <Button variant="primary" href={`/jobs/${job.id}`} className="me-2">View Details</Button>
+                <Button variant="outline-primary" onClick={() => handleShare(job)} className="me-2">
+                  {copied ? 'Copied!' : 'Share'}
+                </Button>
                 {isAdmin && (
                   <>
                     <Button variant="warning" href={`/jobs/edit/${job.id}`} className="me-2">Edit</Button>

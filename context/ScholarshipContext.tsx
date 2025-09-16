@@ -3,18 +3,19 @@
 
 import { createContext, useState, useEffect, ReactNode } from 'react';
 
-interface Scholarship {
-  id: number;
+export interface Scholarship {
+  id: string;
   title: string;
   description: string;
-  image: string; // For simplicity, we'll store the image as a base64 string
+  image: string;
 }
 
 interface ScholarshipContextType {
   scholarships: Scholarship[];
   loading: boolean;
   addScholarship: (scholarship: Omit<Scholarship, 'id'>) => void;
-  deleteScholarship: (id: number) => void;
+  deleteScholarship: (id: string) => void;
+  editScholarship: (scholarship: Scholarship) => void;
 }
 
 export const ScholarshipContext = createContext<ScholarshipContextType | undefined>(undefined);
@@ -24,42 +25,85 @@ export const ScholarshipProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const savedScholarships = localStorage.getItem('scholarships');
-      if (savedScholarships) {
-        setScholarships(JSON.parse(savedScholarships));
-      } else {
-        setScholarships([]);
+    const fetchScholarships = async () => {
+      try {
+        const response = await fetch('/api/scholarships');
+        if (response.ok) {
+          const data = await response.json();
+          setScholarships(data);
+        } else {
+          console.error('Failed to fetch scholarships:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching scholarships:', error);
       }
-    } catch (error) {
-      console.error('Error loading scholarships from localStorage', error);
-      setScholarships([]);
-    } finally {
       setLoading(false);
-    }
+    };
+    fetchScholarships();
   }, []);
 
-  useEffect(() => {
-    if (!loading) { // Only save to localStorage once loading is complete
-      try {
-        localStorage.setItem('scholarships', JSON.stringify(scholarships));
-      } catch (error) {
-        console.error('Error saving scholarships to localStorage', error);
+  const addScholarship = async (scholarship: Omit<Scholarship, 'id'>) => {
+    try {
+      const response = await fetch('/api/scholarships', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(scholarship),
+      });
+      if (response.ok) {
+        const newScholarship = await response.json();
+        setScholarships(prevScholarships => [newScholarship, ...prevScholarships]);
+      } else {
+        console.error('Failed to add scholarship:', response.statusText);
       }
+    } catch (error) {
+      console.error('Error adding scholarship:', error);
     }
-  }, [scholarships, loading]);
-
-  const addScholarship = (scholarship: Omit<Scholarship, 'id'>) => {
-    const newScholarship = { ...scholarship, id: scholarships.length > 0 ? Math.max(...scholarships.map(s => s.id)) + 1 : 1 };
-    setScholarships(prevScholarships => [newScholarship, ...prevScholarships]);
   };
 
-  const deleteScholarship = (id: number) => {
-    setScholarships(scholarships.filter(scholarship => scholarship.id !== id));
+  const deleteScholarship = async (id: string) => {
+    try {
+      const response = await fetch('/api/scholarships', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id }),
+      });
+      if (response.ok) {
+        setScholarships(prevScholarships => prevScholarships.filter(s => s.id !== id));
+      } else {
+        console.error('Failed to delete scholarship:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error deleting scholarship:', error);
+    }
+  };
+
+  const editScholarship = async (updatedScholarship: Scholarship) => {
+    try {
+      const response = await fetch('/api/scholarships', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedScholarship),
+      });
+      if (response.ok) {
+        setScholarships(prevScholarships =>
+          prevScholarships.map(s => (s.id === updatedScholarship.id ? updatedScholarship : s))
+        );
+      } else {
+        console.error('Failed to edit scholarship:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error editing scholarship:', error);
+    }
   };
 
   return (
-    <ScholarshipContext.Provider value={{ scholarships, loading, addScholarship, deleteScholarship }}>
+    <ScholarshipContext.Provider value={{ scholarships, loading, addScholarship, deleteScholarship, editScholarship }}>
       {children}
     </ScholarshipContext.Provider>
   );

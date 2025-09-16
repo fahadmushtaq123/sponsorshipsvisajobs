@@ -10,6 +10,7 @@ const MinesweeperGame = () => {
   const [gameWon, setGameWon] = useState(false);
   const [mineCount, setMineCount] = useState(0);
   const [mode, setMode] = useState('reveal'); // reveal or flag
+  const [canvasSize, setCanvasSize] = useState({ width: 480, height: 480 });
 
   const grid = useRef<any[]>([]);
   const gameOver = useRef(false);
@@ -20,6 +21,20 @@ const MinesweeperGame = () => {
     hard: { rows: 16, cols: 30, mines: 99 },
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      const { cols, rows } = gameSettings[gameMode as keyof typeof gameSettings];
+      const screenWidth = window.innerWidth - 40;
+      const newCellSize = Math.floor(screenWidth / cols);
+      setCanvasSize({ width: newCellSize * cols, height: newCellSize * rows });
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, [gameMode]);
+
   const setupGrid = () => {
     const { rows, cols, mines } = gameSettings[gameMode as keyof typeof gameSettings];
     setMineCount(mines);
@@ -27,10 +42,8 @@ const MinesweeperGame = () => {
     setIsGameOver(false);
     setGameWon(false);
 
-    // Initialize grid
     grid.current = Array(rows).fill(null).map(() => Array(cols).fill(null).map(() => ({ isMine: false, isRevealed: false, isFlagged: false, adjacentMines: 0 })));
 
-    // Place mines
     let minesPlaced = 0;
     while (minesPlaced < mines) {
       const row = Math.floor(Math.random() * rows);
@@ -41,7 +54,6 @@ const MinesweeperGame = () => {
       }
     }
 
-    // Calculate adjacent mines
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (grid.current[r][c].isMine) continue;
@@ -151,25 +163,32 @@ const MinesweeperGame = () => {
     if (gameOver.current) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const { cols } = gameSettings[gameMode as keyof typeof gameSettings];
+    const { cols, rows } = gameSettings[gameMode as keyof typeof gameSettings];
     const cellSize = canvas.width / cols;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const col = Math.floor(x / cellSize);
-    const row = Math.floor(y / (canvas.height / gameSettings[gameMode as keyof typeof gameSettings].rows));
+    const row = Math.floor(y / (canvas.height / rows));
 
     if (mode === 'reveal') {
       revealCell(row, col);
     } else {
-      grid.current[row][col].isFlagged = !grid.current[row][col].isFlagged;
+      if (!grid.current[row][col].isRevealed) {
+        grid.current[row][col].isFlagged = !grid.current[row][col].isFlagged;
+      }
     }
     draw();
   };
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.width = canvasSize.width;
+      canvas.height = canvasSize.height;
+    }
     setupGrid();
-  }, [gameMode]);
+  }, [gameMode, canvasSize]);
 
   return (
     <Container className="mt-5 text-center">
@@ -188,9 +207,9 @@ const MinesweeperGame = () => {
       </Button>
       <canvas
         ref={canvasRef}
-        width={gameSettings[gameMode as keyof typeof gameSettings].cols * 30}
-        height={gameSettings[gameMode as keyof typeof gameSettings].rows * 30}
-        style={{ border: '1px solid black', backgroundColor: '#f0f0f0' }}
+        width={canvasSize.width}
+        height={canvasSize.height}
+        style={{ border: '1px solid black', backgroundColor: '#f0f0f0', maxWidth: '100%' }}
         onClick={handleCanvasClick}
         onContextMenu={(e) => e.preventDefault()} // Prevent context menu on right click
       ></canvas>

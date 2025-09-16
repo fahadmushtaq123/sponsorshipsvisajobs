@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Container, Button, Row, Col } from 'react-bootstrap';
+import { Container, Button } from 'react-bootstrap';
 import GameRecords from '../../../components/GameRecords';
 
 const cardImages = [
@@ -39,7 +39,6 @@ export default function MemoryGame() {
     if (flippedCards.length === 2) {
       const [firstIndex, secondIndex] = flippedCards;
       if (cards[firstIndex].image === cards[secondIndex].image) {
-        // Match found
         setCards(prevCards =>
           prevCards.map((card, index) =>
             index === firstIndex || index === secondIndex
@@ -50,15 +49,7 @@ export default function MemoryGame() {
         setMatchesFound(prev => prev + 1);
       }
 
-      // Flip back after a short delay
       setTimeout(() => {
-        setCards(prevCards =>
-          prevCards.map((card, index) =>
-            index === firstIndex || index === secondIndex
-              ? { ...card, isFlipped: card.isMatched } // Keep matched cards flipped
-              : { ...card, isFlipped: false } // Flip back non-matched cards
-          )
-        );
         setFlippedCards([]);
       }, 1000);
     }
@@ -68,7 +59,7 @@ export default function MemoryGame() {
     if (gameStarted && matchesFound === cardImages.length && addRecord) {
       alert(`Congratulations! You won in ${moves} moves!`);
       addRecord(`${moves} moves`);
-      setGameStarted(false); // End game
+      setGameStarted(false);
     }
   }, [matchesFound, moves, gameStarted, addRecord]);
 
@@ -93,11 +84,10 @@ export default function MemoryGame() {
       return;
     }
 
-    setCards(prevCards =>
-      prevCards.map((card, i) =>
-        i === index ? { ...card, isFlipped: true } : card
-      )
-    );
+    const newCards = [...cards];
+    newCards[index].isFlipped = true;
+    setCards(newCards);
+
     setFlippedCards(prev => [...prev, index]);
     setMoves(prev => prev + 1);
   };
@@ -122,21 +112,17 @@ export default function MemoryGame() {
                   <p>Moves: {moves} | Matches: {matchesFound} / {cardImages.length}</p>
                   <div
                     role="grid"
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(6, 1fr)',
-                      gap: '10px',
-                      maxWidth: '600px',
-                      margin: '0 auto',
-                    }}
+                    className="d-flex flex-wrap justify-content-center"
+                    style={{ maxWidth: '600px', margin: '0 auto' }}
                   >
                     {cards.map((card, index) => (
                       <div
                         key={card.id}
                         onClick={() => handleCardClick(index)}
+                        className="m-1"
                         style={{
-                          width: '80px',
-                          height: '80px',
+                          width: 'clamp(60px, 15vw, 80px)',
+                          height: 'clamp(60px, 15vw, 80px)',
                           backgroundColor: card.isFlipped || card.isMatched ? '#f8f9fa' : '#6c757d',
                           border: '1px solid #dee2e6',
                           display: 'flex',

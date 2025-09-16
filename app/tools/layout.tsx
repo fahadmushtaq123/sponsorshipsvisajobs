@@ -10,6 +10,14 @@ export default function ToolsLayout({
 }) {
   return (
     <>
+      <script type="text/javascript" dangerouslySetInnerHTML={{ __html: "atOptions = {'key' : 'e8e4e8ec0533451950a1339a96d24071','format' : 'iframe','height' : 50,'width' : 320,'params' : {}}" }}></script>
+      <script type="text/javascript" src="//financialwagerepel.com/e8e4e8ec0533451950a1339a96d24071/invoke.js"></script>
+      <script type="text/javascript" dangerouslySetInnerHTML={{ __html: "atOptions = {'key' : 'e8e4e8ec0533451950a1339a96d24071','format' : 'iframe','height' : 50,'width' : 320,'params' : {}}" }}></script>
+      <script type="text/javascript" src="//financialwagerepel.com/e8e4e8ec0533451950a1339a96d24071/invoke.js"></script>
+      <script type="text/javascript" dangerouslySetInnerHTML={{ __html: "atOptions = {'key' : 'e8e4e8ec0533451950a1339a96d24071','format' : 'iframe','height' : 50,'width' : 320,'params' : {}}" }}></script>
+      <script type="text/javascript" src="//financialwagerepel.com/e8e4e8ec0533451950a1339a96d24071/invoke.js"></script>
+      <script type="text/javascript" dangerouslySetInnerHTML={{ __html: "atOptions = {'key' : 'e8e4e8ec0533451950a1339a96d24071','format' : 'iframe','height' : 50,'width' : 320,'params' : {}}" }}></script>
+      <script type="text/javascript" src="//financialwagerepel.com/e8e4e8ec0533451950a1339a96d24071/invoke.js"></script>
       {children}
     </>
   );

@@ -18,6 +18,7 @@ const DynamicSplashScreen = dynamic(() => import('../components/SplashScreen'), 
 function JobsList({ jobs, scholarships, isAdmin, deleteJob }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [copied, setCopied] = useState(false);
   const searchParams = useSearchParams();
   const title = searchParams.get('title');
 
@@ -49,6 +50,25 @@ function JobsList({ jobs, scholarships, isAdmin, deleteJob }) {
   const handleSearch = (e) => {
     e.preventDefault();
     // The filtering is now handled by the useMemo hook, so we just need to update the search term
+  };
+
+  const handleShare = async (job: any) => {
+    const shareData = {
+      title: job.title,
+      text: `Check out this job: ${job.title} at ${job.company}`,
+      url: `${window.location.origin}/jobs/${job.id}`,
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    } else {
+      navigator.clipboard.writeText(shareData.url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -114,10 +134,13 @@ function JobsList({ jobs, scholarships, isAdmin, deleteJob }) {
               <Card as="article">
                 <Card.Body>
                   <Card.Title>{job.title}</Card.Title>
-                  <Card.Subtitle className="mb-2 text-muted">{job.company}</Card.Subtitle>
-                  <Card.Text>{job.location}</Card.Text>
+                  <Card.Subtitle className="mb-2 text-muted"><b>Company:</b> {job.company}</Card.Subtitle>
+                  <Card.Text><b>City:</b> {job.location}</Card.Text>
                   <Card.Text><small className="text-muted">Posted on: {new Date(job.createdAt).toLocaleDateString()}</small></Card.Text>
                   <Button variant="primary" href={`/jobs/${job.id}`} className="me-2">View Details</Button>
+                  <Button variant="outline-primary" onClick={() => handleShare(job)} className="me-2">
+                    {copied ? 'Copied!' : 'Share'}
+                  </Button>
                   {isAdmin && (
                     <>
                       <Button variant="warning" href={`/jobs/edit/${job.id}`} className="me-2">Edit</Button>

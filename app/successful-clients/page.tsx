@@ -10,7 +10,7 @@ interface Client {
 }
 
 export default async function SuccessfulClientsPage() {
-  const filePath = path.join(process.cwd(), 'random_people_jobs_with_locations_700.json');
+  const filePath = path.join(process.cwd(), 'new_clients.json');
   const fileContents = await fs.readFile(filePath, 'utf8');
   const clients: Client[] = JSON.parse(fileContents);
 

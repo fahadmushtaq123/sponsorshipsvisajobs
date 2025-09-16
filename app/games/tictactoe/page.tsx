@@ -13,32 +13,28 @@ function Square({ value, onClick }: { value: Player; onClick: () => void }) {
       className="square"
       onClick={onClick}
       style={{
-        width: '80px',
-        height: '80px',
+        width: '33.33%',
+        paddingBottom: '33.33%',
         fontSize: '2.5rem',
         fontWeight: 'bold',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         border: '1px solid #ccc',
+        position: 'relative',
       }}
     role="gridcell"
     >
-      {value}
+      <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>{value}</span>
     </Button>
   );
 }
 
 function Board({ squares, onClick }: { squares: Player[]; onClick: (i: number) => void }) {
   return (
-    <div className="board">
-      {[0, 1, 2].map(row => (
-        <div key={row} className="board-row" style={{ display: 'flex' }}>
-          {[0, 1, 2].map(col => {
-            const i = row * 3 + col;
-            return <Square key={i} value={squares[i]} onClick={() => onClick(i)} />;
-          })}
-        </div>
+    <div className="board" style={{ display: 'flex', flexWrap: 'wrap', width: '100%', maxWidth: '300px', margin: 'auto' }}>
+      {squares.map((square, i) => (
+        <Square key={i} value={square} onClick={() => onClick(i)} />
       ))}
     </div>
   );

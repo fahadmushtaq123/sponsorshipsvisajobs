@@ -7,6 +7,7 @@ const TetrisGame = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [score, setScore] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [canvasSize, setCanvasSize] = useState({ width: 300, height: 600 });
 
   const board = useRef<any[][]>([]);
   const player = useRef<any>({});
@@ -15,7 +16,21 @@ const TetrisGame = () => {
 
   const COLS = 10;
   const ROWS = 20;
-  const BLOCK_SIZE = 30;
+  const [blockSize, setBlockSize] = useState(30);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const screenWidth = window.innerWidth;
+      const newBlockSize = screenWidth < 400 ? 20 : 30;
+      setBlockSize(newBlockSize);
+      setCanvasSize({ width: COLS * newBlockSize, height: ROWS * newBlockSize });
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const COLORS = [
     null,
@@ -183,11 +198,14 @@ const TetrisGame = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    canvas.width = canvasSize.width;
+    canvas.height = canvasSize.height;
+
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
-    ctx.scale(BLOCK_SIZE, BLOCK_SIZE);
+    ctx.scale(blockSize, blockSize);
     drawMatrix(board.current, { x: 0, y: 0 });
     drawMatrix(player.current.matrix, player.current.pos);
     ctx.restore();
@@ -226,6 +244,8 @@ const TetrisGame = () => {
     } else { // Vertical swipe
       if (dy > 0) {
         playerDrop();
+      } else {
+        playerRotate(1); // Rotate on swipe up
       }
     }
   };
@@ -238,7 +258,7 @@ const TetrisGame = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [canvasSize]);
 
   return (
     <Container className="mt-5 text-center">
@@ -246,9 +266,9 @@ const TetrisGame = () => {
       <p>Use arrow keys or touch controls to play.</p>
       <canvas
         ref={canvasRef}
-        width={COLS * BLOCK_SIZE}
-        height={ROWS * BLOCK_SIZE}
-        style={{ border: '1px solid black' }}
+        width={canvasSize.width}
+        height={canvasSize.height}
+        style={{ border: '1px solid black', maxWidth: '100%' }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       ></canvas>

@@ -5,6 +5,7 @@ import { createContext, useState, useEffect, ReactNode } from 'react';
 export interface Blog {
   id: number;
   title: string;
+  slug: string;
   description: string;
   image: string; // For simplicity, we'll store the image as a base64 string
   imageWidth?: string; // Optional width for display
@@ -13,12 +14,23 @@ export interface Blog {
 
 interface BlogContextType {
   blogs: Blog[];
-  addBlog: (blog: Omit<Blog, 'id'>) => void;
+  addBlog: (blog: Omit<Blog, 'id' | 'slug'>) => void;
   deleteBlog: (id: number) => void;
   editBlog: (blog: Blog) => void;
 }
 
 export const BlogContext = createContext<BlogContextType | undefined>(undefined);
+
+const slugify = (text: string) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .replace(/\s+/g, '-') // Replace spaces with -
+    .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+    .replace(/\-\-+/g, '-') // Replace multiple - with single -
+    .replace(/^-+/, '') // Trim - from start of text
+    .replace(/-+$/, ''); // Trim - from end of text
+};
 
 export const BlogProvider = ({ children }: { children: ReactNode }) => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -40,14 +52,15 @@ export const BlogProvider = ({ children }: { children: ReactNode }) => {
     fetchBlogs();
   }, []);
 
-  const addBlog = async (blog: Omit<Blog, 'id'>) => {
+  const addBlog = async (blog: Omit<Blog, 'id' | 'slug'>) => {
     try {
+      const slug = slugify(blog.title);
       const response = await fetch('/api/blogs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(blog),
+        body: JSON.stringify({ ...blog, slug }),
       });
       if (response.ok) {
         const newBlog = await response.json();
@@ -81,16 +94,17 @@ export const BlogProvider = ({ children }: { children: ReactNode }) => {
 
   const editBlog = async (updatedBlog: Blog) => {
     try {
+      const slug = slugify(updatedBlog.title);
       const response = await fetch('/api/blogs', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updatedBlog),
+        body: JSON.stringify({ ...updatedBlog, slug }),
       });
       if (response.ok) {
         setBlogs(prevBlogs =>
-          prevBlogs.map(blog => (blog.id === updatedBlog.id ? updatedBlog : blog))
+          prevBlogs.map(blog => (blog.id === updatedBlog.id ? { ...updatedBlog, slug } : blog))
         );
       } else {
         console.error('Failed to edit blog:', response.statusText);

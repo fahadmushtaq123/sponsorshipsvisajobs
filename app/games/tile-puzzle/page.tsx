@@ -41,7 +41,6 @@ export default function TilePuzzle() {
         }
       }
     }
-    // For a 4x4 grid, solvable if inversions are even
     return inversions % 2 === 0;
   };
 
@@ -56,7 +55,6 @@ export default function TilePuzzle() {
     const emptyRow = Math.floor(emptyIndex / BOARD_SIZE);
     const emptyCol = emptyIndex % BOARD_SIZE;
 
-    // Check if adjacent (horizontally or vertically)
     const isAdjacent =
       (Math.abs(clickedRow - emptyRow) === 1 && clickedCol === emptyCol) ||
       (Math.abs(clickedCol - emptyCol) === 1 && clickedRow === emptyRow);
@@ -70,7 +68,6 @@ export default function TilePuzzle() {
     const newTiles = [...tiles];
     const emptyIndex = getEmptyTileIndex();
 
-    // Swap clicked tile with empty tile
     [newTiles[clickedIndex], newTiles[emptyIndex]] = [
       newTiles[emptyIndex],
       newTiles[clickedIndex],
@@ -82,7 +79,7 @@ export default function TilePuzzle() {
     const solved = tiles.every((tile, index) => tile === index);
     setIsSolved(solved);
     if (solved && addRecord) {
-      addRecord('Solved!'); // You might want to add a score here, e.g., time taken or moves
+      addRecord('Solved!');
     }
   }, [tiles, addRecord]);
 
@@ -102,12 +99,12 @@ export default function TilePuzzle() {
 
               <div
                 role="grid"
+                className="mx-auto"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)`,
-                  width: '320px', // 80px * 4
-                  height: '320px', // 80px * 4
-                  margin: '20px auto',
+                  width: 'clamp(280px, 90vw, 400px)',
+                  height: 'clamp(280px, 90vw, 400px)',
                   border: '2px solid #333',
                   position: 'relative',
                 }}
@@ -117,21 +114,20 @@ export default function TilePuzzle() {
                     key={index}
                     onClick={() => moveTile(index)}
                     style={{
-                      width: '80px',
-                      height: '80px',
+                      width: '100%',
+                      height: '100%',
                       border: '1px solid #eee',
                       boxSizing: 'border-box',
                       cursor: tile === TILE_COUNT - 1 ? 'default' : 'pointer',
                       backgroundColor: tile === TILE_COUNT - 1 ? '#f0f0f0' : 'transparent',
                       backgroundImage: tile !== TILE_COUNT - 1 ? `url(${IMAGE_URL})` : 'none',
-                      backgroundSize: `${BOARD_SIZE * 80}px ${BOARD_SIZE * 80}px`,
-                      backgroundPosition: `-${(tile % BOARD_SIZE) * 80}px -${Math.floor(tile / BOARD_SIZE) * 80}px`,
+                      backgroundSize: `400% 400%`,
+                      backgroundPosition: `calc(${(tile % BOARD_SIZE) * (100 / (BOARD_SIZE - 1))}% - ${tile % BOARD_SIZE === 0 ? 0 : (tile % BOARD_SIZE) * 0}px) calc(${Math.floor(tile / BOARD_SIZE) * (100 / (BOARD_SIZE - 1))}% - ${Math.floor(tile / BOARD_SIZE) === 0 ? 0 : Math.floor(tile / BOARD_SIZE) * 0}px)`,
                       transition: 'background-color 0.3s ease',
                     }}
                     role="gridcell"
                     aria-label={tile === TILE_COUNT - 1 ? 'Empty space' : `Tile ${tile + 1}`}
                   >
-                    {/* {tile !== TILE_COUNT - 1 ? tile + 1 : ''} */}
                   </div>
                 ))}
               </div>

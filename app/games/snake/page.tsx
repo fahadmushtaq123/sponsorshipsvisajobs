@@ -7,6 +7,7 @@ const SnakeGame = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [score, setScore] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [canvasSize, setCanvasSize] = useState({ width: 400, height: 400 });
 
   const snake = useRef([{ x: 200, y: 200 }]);
   const direction = useRef({ x: 0, y: -20 }); // Start moving up
@@ -14,10 +15,23 @@ const SnakeGame = () => {
   const gameOver = useRef(false);
   const touchStart = useRef({ x: 0, y: 0 });
 
+  useEffect(() => {
+    const handleResize = () => {
+      const size = Math.min(window.innerWidth - 20, 400);
+      setCanvasSize({ width: size, height: size });
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const generateFood = () => {
+    const gridSize = 20;
     food.current = {
-      x: Math.floor(Math.random() * 20) * 20,
-      y: Math.floor(Math.random() * 20) * 20,
+      x: Math.floor(Math.random() * (canvasSize.width / gridSize)) * gridSize,
+      y: Math.floor(Math.random() * (canvasSize.height / gridSize)) * gridSize,
     };
   };
 
@@ -25,14 +39,19 @@ const SnakeGame = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    canvas.width = canvasSize.width;
+    canvas.height = canvasSize.height;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const gridSize = 20;
 
     const resetGame = () => {
-      snake.current = [{ x: 200, y: 200 }];
-      direction.current = { x: 0, y: -20 };
+      const startX = Math.floor(canvasSize.width / 2 / gridSize) * gridSize;
+      const startY = Math.floor(canvasSize.height / 2 / gridSize) * gridSize;
+      snake.current = [{ x: startX, y: startY }];
+      direction.current = { x: 0, y: -gridSize };
       generateFood();
       setScore(0);
       gameOver.current = false;
@@ -56,15 +75,12 @@ const SnakeGame = () => {
       setTimeout(() => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw food
         ctx.fillStyle = 'red';
         ctx.fillRect(food.current.x, food.current.y, gridSize, gridSize);
 
-        // Move snake
         const head = { x: snake.current[0].x + direction.current.x, y: snake.current[0].y + direction.current.y };
         snake.current.unshift(head);
 
-        // Check if snake ate food
         if (head.x === food.current.x && head.y === food.current.y) {
           setScore(prevScore => prevScore + 1);
           generateFood();
@@ -72,7 +88,6 @@ const SnakeGame = () => {
           snake.current.pop();
         }
 
-        // Check for collision
         if (
           head.x < 0 ||
           head.x >= canvas.width ||
@@ -84,7 +99,6 @@ const SnakeGame = () => {
           setIsGameOver(true);
         }
 
-        // Draw snake
         ctx.fillStyle = 'green';
         snake.current.forEach(segment => {
           ctx.fillRect(segment.x, segment.y, gridSize, gridSize);
@@ -120,18 +134,12 @@ const SnakeGame = () => {
       const dx = touchEnd.x - touchStart.current.x;
       const dy = touchEnd.y - touchStart.current.y;
 
-      if (Math.abs(dx) > Math.abs(dy)) { // Horizontal swipe
-        if (dx > 0) { // Right
-          if (direction.current.x === 0) direction.current = { x: gridSize, y: 0 };
-        } else { // Left
-          if (direction.current.x === 0) direction.current = { x: -gridSize, y: 0 };
-        }
-      } else { // Vertical swipe
-        if (dy > 0) { // Down
-          if (direction.current.y === 0) direction.current = { x: 0, y: gridSize };
-        } else { // Up
-          if (direction.current.y === 0) direction.current = { x: 0, y: -gridSize };
-        }
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0 && direction.current.x === 0) direction.current = { x: gridSize, y: 0 };
+        else if (dx < 0 && direction.current.x === 0) direction.current = { x: -gridSize, y: 0 };
+      } else {
+        if (dy > 0 && direction.current.y === 0) direction.current = { x: 0, y: gridSize };
+        else if (dy < 0 && direction.current.y === 0) direction.current = { x: 0, y: -gridSize };
       }
     };
 
@@ -146,7 +154,7 @@ const SnakeGame = () => {
       canvas.removeEventListener('touchstart', handleTouchStart);
       canvas.removeEventListener('touchend', handleTouchEnd);
     };
-  }, []);
+  }, [canvasSize, score]);
 
   return (
     <Container className="mt-5 text-center">
@@ -154,9 +162,9 @@ const SnakeGame = () => {
       <p>Use the arrow keys or swipe to control the snake.</p>
       <canvas
         ref={canvasRef}
-        width={400}
-        height={400}
-        style={{ border: '1px solid black', backgroundColor: '#f0f0f0' }}
+        width={canvasSize.width}
+        height={canvasSize.height}
+        style={{ border: '1px solid black', backgroundColor: '#f0f0f0', maxWidth: '100%' }}
       ></canvas>
       <div className="mt-3">
         <h2>Score: {score}</h2>

@@ -48,6 +48,11 @@ const defaultInitialTools: Tool[] = [
     id: 6,
     title: 'QR Code Generator',
     description: 'Generate QR codes from text or URLs.',
+  },
+  {
+    id: 7,
+    title: 'Typing Speed Test',
+    description: 'Test your typing speed and accuracy.',
   }
 ];
 
