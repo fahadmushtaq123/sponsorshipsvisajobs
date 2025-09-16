@@ -27,7 +27,7 @@ export async function generateMetadata(props: GenerateMetadataProps) {
     openGraph: {
       title: `${jobTitle} at ${jobCompany} - ${jobLocation}`,
       description: jobDescription,
-      url: `https://yourwebsite.com/jobs/${params.id}`, // Replace with your actual domain
+      url: `https://yourwebsite.com/jobs/${resolvedParams.id}`, // Replace with your actual domain
       type: 'article',
       // Add an image if available, e.g., og:image: job.image
     },
