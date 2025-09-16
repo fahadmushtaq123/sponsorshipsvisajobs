@@ -10,6 +10,7 @@ const FlappyBirdGame = () => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [topScores, setTopScores] = useState<{ name: string, score: number }[]>([]);
   const [gameStarted, setGameStarted] = useState(false);
+  const [showVideo, setShowVideo] = useState(true);
   const scoreRef = useRef(score);
 
   useEffect(() => {
@@ -325,13 +326,21 @@ const FlappyBirdGame = () => {
 
   return (
     <Container fluid style={{ padding: 0 }}>
-      {!gameStarted && (
+      {showVideo ? (
+        <video
+          src="/flappybird.mp4"
+          autoPlay
+          muted
+          onEnded={() => setShowVideo(false)}
+          style={{ width: '100%', height: '100vh', objectFit: 'cover' }}
+        />
+      ) : !gameStarted ? (
         <div style={{ textAlign: 'center', paddingTop: '50px' }}>
           <Image src="/flappybird1.webp" alt="Flappy Bird" width={600} height={400} />
           <h1 className="mt-4">Flappy Bird</h1>
           <Button onClick={() => setGameStarted(true)} size="lg">Start Game</Button>
         </div>
-      )}
+      ) : null}
       <canvas
         ref={canvasRef}
         style={{ display: gameStarted ? 'block' : 'none' }}
