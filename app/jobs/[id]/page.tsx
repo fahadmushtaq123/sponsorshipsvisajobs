@@ -1,11 +1,7 @@
 import JobDetailsClient from './JobDetailsClient';
 import { getJobById } from '@/lib/get-job'; // Import the new function
 
-interface JobDetailsPageProps {
-  params: { id: string };
-}
-
-export async function generateMetadata({ params }: JobDetailsPageProps) {
+export async function generateMetadata({ params }: { params: { id: string } }) {
   const job = await getJobById(params.id);
 
   if (!job) {
