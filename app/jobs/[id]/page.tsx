@@ -1,8 +1,11 @@
 import JobDetailsClient from './JobDetailsClient';
 import { getJobById } from '@/lib/get-job'; // Import the new function
 
-export async function generateMetadata(props: { params: { id: string } }) {
-  const { params } = props;
+type GenerateMetadataProps = {
+  params: { id: string };
+};
+
+export async function generateMetadata({ params }: GenerateMetadataProps) {
   const job = await getJobById(params.id);
 
   if (!job) {
