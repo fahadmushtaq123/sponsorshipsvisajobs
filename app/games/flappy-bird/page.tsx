@@ -10,7 +10,12 @@ const FlappyBirdGame = () => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [topScores, setTopScores] = useState<{ name: string, score: number }[]>([]);
   const [gameStarted, setGameStarted] = useState(false);
-  const [showVideo, setShowVideo] = useState(true);
+  const [showVideo, setShowVideo] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !sessionStorage.getItem('flappyBirdVideoPlayed');
+    }
+    return true; // Default to true on server-side render or if window is not defined
+  });
   const scoreRef = useRef(score);
 
   useEffect(() => {
@@ -259,7 +264,7 @@ const FlappyBirdGame = () => {
 
       ctx.fillStyle = 'black';
       ctx.font = '24px Arial';
-      ctx.fillText(`Score: ${score}`, 10, 30);
+      ctx.fillText(`Score: ${scoreRef.current}`, 10, 30);
     };
 
     const gameLoop = () => {
@@ -331,7 +336,10 @@ const FlappyBirdGame = () => {
           src="/flappybird.mp4"
           autoPlay
           muted
-          onEnded={() => setShowVideo(false)}
+          onEnded={() => {
+            setShowVideo(false);
+            sessionStorage.setItem('flappyBirdVideoPlayed', 'true');
+          }}
           style={{ width: '100%', height: '100vh', objectFit: 'cover' }}
         />
       ) : !gameStarted ? (
