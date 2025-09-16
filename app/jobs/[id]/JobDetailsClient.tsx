@@ -89,24 +89,24 @@ export default function JobDetails() {
         <Card.Body>
           <div className="d-flex justify-content-between align-items-start">
             <Card.Title>{job.title}</Card.Title>
-            <div>
-              <Button variant="outline-primary" onClick={handleShare} className="me-2">
-                {copied ? 'Copied!' : 'Share'}
-              </Button>
-              <Button variant="outline-primary" onClick={handleFacebookShare} className="me-2">
-                Share on Facebook
-              </Button>
-              <Button variant="outline-success" onClick={handleWhatsAppShare} className="me-2">
-                Share on WhatsApp
-              </Button>
-              <Button variant="outline-info" onClick={handleLinkedInShare}>
-                Share on LinkedIn
-              </Button>
-            </div>
           </div>
           <Card.Subtitle className="mb-2 text-muted"><b>Company:</b> {job.company}</Card.Subtitle>
           <Card.Text><b>City:</b> {job.location}</Card.Text>
           <Card.Text dangerouslySetInnerHTML={{ __html: job.description }} />
+          <div className="mt-3">
+            <Button variant="outline-primary" onClick={handleShare} className="me-2">
+              {copied ? 'Copied!' : 'Share'}
+            </Button>
+            <Button variant="outline-primary" onClick={handleFacebookShare} className="me-2">
+              Share on Facebook
+            </Button>
+            <Button variant="outline-success" onClick={handleWhatsAppShare} className="me-2">
+              Share on WhatsApp
+            </Button>
+            <Button variant="outline-info" onClick={handleLinkedInShare}>
+              Share on LinkedIn
+            </Button>
+          </div>
         </Card.Body>
       </Card>
       <ImageModal show={showModal} onHide={() => setShowModal(false)} imageUrl={modalImageUrl} />
