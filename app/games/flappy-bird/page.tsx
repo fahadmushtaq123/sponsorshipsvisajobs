@@ -31,6 +31,10 @@ const FlappyBirdGame = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const baseWidth = 320;
+    const baseHeight = 480;
+    let scale = 1;
+
     let bird = { x: 50, y: 150, width: 34, height: 24, velocity: 0 };
     let pipes: { x: number, y: number, width: number, height: number, passed: boolean }[] = [];
     let frame = 0;
@@ -40,16 +44,24 @@ const FlappyBirdGame = () => {
     let superPowerItem: { x: number, y: number, width: number, height: number } | null = null;
     let bullets: { x: number, y: number, width: number, height: number }[] = [];
 
-    const gravity = 0.4;
-    const jumpStrength = -8;
-    const pipeWidth = 50;
-    const pipeGap = 200;
+    let gravity = 0.4;
+    let jumpStrength = -8;
+    let pipeWidth = 50;
+    let pipeGap = 200;
     let pipeSpeed = 2;
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      pipeSpeed = canvas.width / 400;
+      scale = Math.min(canvas.width / baseWidth, canvas.height / baseHeight);
+      
+      bird.width = 34 * scale;
+      bird.height = 24 * scale;
+      pipeWidth = 50 * scale;
+      pipeGap = 200 * scale;
+      gravity = 0.4 * scale;
+      jumpStrength = -8 * scale;
+      pipeSpeed = 2 * scale;
     };
 
     const saveScore = async () => {
@@ -70,7 +82,8 @@ const FlappyBirdGame = () => {
     };
 
     const resetGame = () => {
-      bird = { x: 50, y: 150, width: 34, height: 24, velocity: 0 };
+      resizeCanvas();
+      bird = { x: 50 * scale, y: 150 * scale, width: 34 * scale, height: 24 * scale, velocity: 0 };
       pipes = [];
       setScore(0);
       gameOver = false;
@@ -110,13 +123,13 @@ const FlappyBirdGame = () => {
       // Eye
       ctx.fillStyle = 'black';
       ctx.beginPath();
-      ctx.arc(bird.width / 4, -bird.height / 8, 2, 0, Math.PI * 2);
+      ctx.arc(bird.width / 4, -bird.height / 8, 2 * scale, 0, Math.PI * 2);
       ctx.fill();
 
       // Gun
       if (isSuperPowerActive) {
         ctx.fillStyle = 'black';
-        ctx.fillRect(bird.width / 2, -2, 10, 4);
+        ctx.fillRect(bird.width / 2, -2 * scale, 10 * scale, 4 * scale);
       }
 
       ctx.restore();
@@ -130,7 +143,7 @@ const FlappyBirdGame = () => {
         ctx.fillStyle = topPipeGradient;
 
         ctx.fillRect(pipe.x, 0, pipe.width, pipe.y);
-        ctx.fillRect(pipe.x - 5, pipe.y - 20, pipe.width + 10, 20);
+        ctx.fillRect(pipe.x - 5 * scale, pipe.y - 20 * scale, pipe.width + 10 * scale, 20 * scale);
 
         const bottomPipeGradient = ctx.createLinearGradient(pipe.x, 0, pipe.x + pipe.width, 0);
         bottomPipeGradient.addColorStop(0, '#558B2F');
@@ -138,7 +151,7 @@ const FlappyBirdGame = () => {
         ctx.fillStyle = bottomPipeGradient;
         
         ctx.fillRect(pipe.x, pipe.y + pipeGap, pipe.width, canvas.height - pipe.y - pipeGap);
-        ctx.fillRect(pipe.x - 5, pipe.y + pipeGap, pipe.width + 10, 20);
+        ctx.fillRect(pipe.x - 5 * scale, pipe.y + pipeGap, pipe.width + 10 * scale, 20 * scale);
       });
     };
 
@@ -174,9 +187,9 @@ const FlappyBirdGame = () => {
       if (frame % 500 === 0 && !superPowerItem) {
         superPowerItem = {
           x: canvas.width,
-          y: Math.random() * (canvas.height - 200) + 100,
-          width: 20,
-          height: 20,
+          y: Math.random() * (canvas.height - 200 * scale) + 100 * scale,
+          width: 20 * scale,
+          height: 20 * scale,
         };
       }
 
@@ -190,7 +203,7 @@ const FlappyBirdGame = () => {
 
       // Move bullets
       bullets.forEach(bullet => {
-        bullet.x += 5;
+        bullet.x += 5 * scale;
       });
       bullets = bullets.filter(bullet => bullet.x < canvas.width);
 
@@ -220,7 +233,7 @@ const FlappyBirdGame = () => {
       });
 
       if (frame % 100 === 0) {
-        const pipeY = Math.random() * (canvas.height - pipeGap - 200) + 100;
+        const pipeY = Math.random() * (canvas.height - pipeGap - 200 * scale) + 100 * scale;
         pipes.push({ x: canvas.width, y: pipeY, width: pipeWidth, height: canvas.height, passed: false });
       }
 
@@ -263,15 +276,15 @@ const FlappyBirdGame = () => {
       drawBullets();
 
       ctx.fillStyle = 'black';
-      ctx.font = '24px Arial';
-      ctx.fillText(`Score: ${scoreRef.current}`, 10, 30);
+      ctx.font = `${24 * scale}px Arial`;
+      ctx.fillText(`Score: ${scoreRef.current}`, 10 * scale, 30 * scale);
     };
 
     const gameLoop = () => {
       if (gameOver) {
         ctx.fillStyle = 'black';
-        ctx.font = '48px Arial';
-        ctx.fillText('Game Over', canvas.width / 2 - 120, canvas.height / 2);
+        ctx.font = `${48 * scale}px Arial`;
+        ctx.fillText('Game Over', canvas.width / 2 - (120 * scale), canvas.height / 2);
         return;
       }
 
@@ -285,8 +298,8 @@ const FlappyBirdGame = () => {
       bullets.push({
         x: bird.x + bird.width,
         y: bird.y + bird.height / 2,
-        width: 10,
-        height: 5,
+        width: 10 * scale,
+        height: 5 * scale,
       });
     };
 
@@ -302,7 +315,7 @@ const FlappyBirdGame = () => {
       }
     };
 
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', resetGame);
     canvas.addEventListener('click', handleJump);
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space') {
@@ -311,11 +324,10 @@ const FlappyBirdGame = () => {
       }
     });
 
-    resizeCanvas();
     resetGame();
 
     return () => {
-      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('resize', resetGame);
     };
   }, [gameStarted]);
 
@@ -344,7 +356,7 @@ const FlappyBirdGame = () => {
         />
       ) : !gameStarted ? (
         <div style={{ textAlign: 'center', paddingTop: '50px' }}>
-          <Image src="/flappybird1.webp" alt="Flappy Bird" width={600} height={400} />
+          <Image src="/compressed/flappybird1.webp" alt="Flappy Bird" width={600} height={400} style={{ maxWidth: '100%', height: 'auto' }} />
           <h1 className="mt-4">Flappy Bird</h1>
           <Button onClick={() => setGameStarted(true)} size="lg">Start Game</Button>
         </div>

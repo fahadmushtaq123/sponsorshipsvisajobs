@@ -26,10 +26,13 @@ const getAllFiles = (dirPath, arrayOfFiles) => {
   arrayOfFiles = arrayOfFiles || [];
 
   files.forEach((file) => {
-    if (fs.statSync(path.join(dirPath, file)).isDirectory()) {
-      arrayOfFiles = getAllFiles(path.join(dirPath, file), arrayOfFiles);
+    const filePath = path.join(dirPath, file);
+    if (fs.statSync(filePath).isDirectory()) {
+      if (file !== 'compressed') { // Exclude the 'compressed' directory
+        arrayOfFiles = getAllFiles(filePath, arrayOfFiles);
+      }
     } else {
-      arrayOfFiles.push(path.join(dirPath, file));
+      arrayOfFiles.push(filePath);
     }
   });
 
