@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
-    "build": "NODE_OPTIONS=--max-old-space-size=4096 next build",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next build",
     "start": "NODE_ENV=production node app.js",
     "lint": "next lint",
     "postinstall": "npm run build"
@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@types/node": "24.1.0",
+    "cross-env": "^10.0.0",
     "typescript": "5.8.3"
   }
 }
