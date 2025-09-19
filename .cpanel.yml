@@ -1,0 +1,10 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/YOUR_CPANEL_USERNAME/YOUR_APP_DIRECTORY
+    - /opt/alt/alt-nodejs18/root/usr/bin/npm install --prefix $DEPLOYPATH
+    - /opt/alt/alt-nodejs18/root/usr/bin/npm run build --prefix $DEPLOYPATH
+    - /bin/cp -R .next $DEPLOYPATH
+    - /bin/cp -R public $DEPLOYPATH
+    - /bin/cp package.json $DEPLOYPATH
+    - /bin/cp next.config.js $DEPLOYPATH
